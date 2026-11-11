@@ -24,6 +24,10 @@ jobs:
           flutter-version: '3.19.x'
           channel: 'stable'
 
+      - name: Create Flutter Project Structure
+        run: |
+          flutter create . --org com.arabictrivia --project-name arabic_trivia_millionaire --platforms android
+
       - name: Install dependencies
         run: flutter pub get
 
