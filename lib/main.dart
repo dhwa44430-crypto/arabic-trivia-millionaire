@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'questions.dart';
@@ -154,103 +153,113 @@ class _GameScreenState extends State<GameScreen>
           SafeArea(
             child: isGameOver
                 ? _buildGameOver()
-                : LayoutBuilder(
-                    builder: (context, constraints) {
-                      final screenHeight = constraints.maxHeight;
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              height: 78,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                : Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 65,
+                          child: Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'من سيربح المليار',
-                                        style: TextStyle(
-                                          color: Color(0xFFFFD77B),
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 5),
-                                      Text(
-                                        'السؤال ${currentQuestionIndex + 1} / ${arabicTriviaQuestions.length}',
-                                        style: const TextStyle(
-                                          color: Colors.white70,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ],
+                                  const Text(
+                                    'من سيربح المليار',
+                                    style: TextStyle(
+                                      color: Color(0xFFFFD77B),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                  _buildTimer(),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    'السؤال ${currentQuestionIndex + 1} / ${arabicTriviaQuestions.length}',
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                                 ],
                               ),
-                            ),
-
-                            Expanded(
-                              flex: 3,
-                              child: AnimatedSwitcher(
-                                duration: const Duration(
-                                  milliseconds: 450,
-                                ),
-                                child: _buildQuestion(
-                                  currentQ.questionText,
-                                ),
-                              ),
-                            ),
-
-                            SizedBox(
-                              height: 65,
-                              child: Center(
-                                child: _buildHelpButtons(),
-                              ),
-                            ),
-
-                            Expanded(
-                              flex: 4,
-                              child: GridView.builder(
-                                physics:
-                                    const NeverScrollableScrollPhysics(),
-                                padding: const EdgeInsets.only(
-                                  top: 5,
-                                  bottom: 5,
-                                ),
-                                itemCount: currentQ.options.length,
-                                gridDelegate:
-                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  childAspectRatio: 1.65,
-                                  crossAxisSpacing: 9,
-                                  mainAxisSpacing: 10,
-                                ),
-                                itemBuilder: (context, index) {
-                                  return _buildAnswerButton(
-                                    index,
-                                    currentQ.options[index],
-                                  );
-                                },
-                              ),
-                            ),
-
-                            SizedBox(
-                              height: screenHeight * 0.13,
-                              child: _buildPrizeLadder(),
-                            ),
-                          ],
+                              _buildTimer(),
+                            ],
+                          ),
                         ),
-                      );
-                    },
+
+                        const SizedBox(height: 5),
+
+                        // القسم الرئيسي: يحتوي على شجرة الجوائز في اليسار وباقي محتوى اللعبة في اليمين
+                        Expanded(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // شجرة الجوائز العمودية على جهة اليسار
+                              SizedBox(
+                                width: 95,
+                                child: _buildPrizeLadder(),
+                              ),
+                              const SizedBox(width: 8),
+
+                              // محتوى الأسئلة والاختيارات ووسائل المساعدة
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Expanded(
+                                      flex: 3,
+                                      child: AnimatedSwitcher(
+                                        duration: const Duration(
+                                          milliseconds: 450,
+                                        ),
+                                        child: _buildQuestion(
+                                          currentQ.questionText,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    SizedBox(
+                                      height: 50,
+                                      child: Center(
+                                        child: _buildHelpButtons(),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Expanded(
+                                      flex: 4,
+                                      child: GridView.builder(
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        padding: EdgeInsets.zero,
+                                        itemCount: currentQ.options.length,
+                                        gridDelegate:
+                                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2,
+                                          childAspectRatio: 1.55,
+                                          crossAxisSpacing: 8,
+                                          mainAxisSpacing: 8,
+                                        ),
+                                        itemBuilder: (context, index) {
+                                          return _buildAnswerButton(
+                                            index,
+                                            currentQ.options[index],
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
           ),
         ],
@@ -260,10 +269,6 @@ class _GameScreenState extends State<GameScreen>
 
   Widget _buildPrizeLadder() {
     return Container(
-      margin: const EdgeInsets.only(
-        top: 5,
-        bottom: 2,
-      ),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
@@ -286,86 +291,78 @@ class _GameScreenState extends State<GameScreen>
           ),
         ],
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final itemWidth =
-              (constraints.maxWidth * 0.25).clamp(85.0, 115.0);
+      child: ListView.builder(
+        reverse: true,
+        padding: const EdgeInsets.symmetric(
+          horizontal: 6,
+          vertical: 6,
+        ),
+        itemCount: arabicTriviaQuestions.length,
+        itemBuilder: (context, index) {
+          final questionIndex = index;
 
-          return ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 5,
-              vertical: 5,
-            ),
-            itemCount: arabicTriviaQuestions.length,
-            itemBuilder: (context, index) {
-              final questionIndex =
-                  arabicTriviaQuestions.length - 1 - index;
+          final prize =
+              arabicTriviaQuestions[questionIndex].prizeMoney;
 
-              final prize =
-                  arabicTriviaQuestions[questionIndex].prizeMoney;
+          final isCurrent =
+              questionIndex == currentQuestionIndex;
 
-              final isCurrent =
-                  questionIndex == currentQuestionIndex;
-
-              return SizedBox(
-                width: itemWidth,
-                child: Center(
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    width: itemWidth - 7,
-                    height: constraints.maxHeight * 0.78,
-                    decoration: BoxDecoration(
-                      gradient: isCurrent
-                          ? const LinearGradient(
-                              colors: [
-                                Color(0xFFFFE89A),
-                                Color(0xFFFFB82E),
-                                Color(0xFFFFE89A),
-                              ],
-                            )
-                          : const LinearGradient(
-                              colors: [
-                                Color(0xFF10294B),
-                                Color(0xFF07162E),
-                              ],
-                            ),
-                      borderRadius: BorderRadius.circular(9),
-                      border: Border.all(
-                        color: isCurrent
-                            ? const Color(0xFFFFE9A5)
-                            : const Color(0xFF29466C),
-                        width: isCurrent ? 1.8 : 1,
+          return Container(
+            margin: const EdgeInsets.symmetric(vertical: 3),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              height: 32,
+              decoration: BoxDecoration(
+                gradient: isCurrent
+                    ? const LinearGradient(
+                        colors: [
+                          Color(0xFFFFE89A),
+                          Color(0xFFFFB82E),
+                          Color(0xFFFFE89A),
+                        ],
+                      )
+                    : const LinearGradient(
+                        colors: [
+                          Color(0xFF10294B),
+                          Color(0xFF07162E),
+                        ],
                       ),
-                      boxShadow: isCurrent
-                          ? [
-                              BoxShadow(
-                                color: Colors.amber.withOpacity(0.65),
-                                blurRadius: 10,
-                                spreadRadius: 1,
-                              ),
-                            ]
-                          : [],
-                    ),
-                    child: Center(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          '\$${formatMoney(prize)}',
-                          style: TextStyle(
-                            color: isCurrent
-                                ? const Color(0xFF17100A)
-                                : const Color(0xFFFFE6A1),
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                          ),
+                borderRadius: BorderRadius.circular(7),
+                border: Border.all(
+                  color: isCurrent
+                      ? const Color(0xFFFFE9A5)
+                      : const Color(0xFF29466C),
+                  width: isCurrent ? 1.8 : 1,
+                ),
+                boxShadow: isCurrent
+                    ? [
+                        BoxShadow(
+                          color: Colors.amber.withOpacity(0.65),
+                          blurRadius: 8,
+                          spreadRadius: 1,
                         ),
+                      ]
+                    : [],
+              ),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      '\$${formatMoney(prize)}',
+                      style: TextStyle(
+                        color: isCurrent
+                            ? const Color(0xFF17100A)
+                            : const Color(0xFFFFE6A1),
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ),
-              );
-            },
+              ),
+            ),
           );
         },
       ),
@@ -377,16 +374,16 @@ class _GameScreenState extends State<GameScreen>
         timeLeft <= 10 ? Colors.redAccent : const Color(0xFFFF7043);
 
     return Container(
-      width: 70,
-      height: 70,
-      padding: const EdgeInsets.all(4),
+      width: 58,
+      height: 58,
+      padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: const Color(0xFF071326),
         boxShadow: [
           BoxShadow(
             color: timerColor.withOpacity(0.35),
-            blurRadius: 18,
+            blurRadius: 14,
             spreadRadius: 2,
           ),
         ],
@@ -397,7 +394,7 @@ class _GameScreenState extends State<GameScreen>
           SizedBox.expand(
             child: CircularProgressIndicator(
               value: timeLeft / 30,
-              strokeWidth: 4,
+              strokeWidth: 3.5,
               backgroundColor: const Color(0xFF462D32),
               valueColor: AlwaysStoppedAnimation<Color>(
                 timerColor,
@@ -408,19 +405,18 @@ class _GameScreenState extends State<GameScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                'الوقت المتبقي',
+                'الوقت',
                 style: TextStyle(
                   color: Colors.white70,
-                  fontSize: 9,
+                  fontSize: 8,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 2),
               Text(
                 '$timeLeft ث',
                 style: TextStyle(
                   color: timerColor,
-                  fontSize: 19,
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -439,8 +435,8 @@ class _GameScreenState extends State<GameScreen>
           clipper: QuestionShapeClipper(),
           child: Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: 30,
-              vertical: 12,
+              horizontal: 16,
+              vertical: 10,
             ),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
@@ -452,12 +448,12 @@ class _GameScreenState extends State<GameScreen>
               ),
               border: Border.all(
                 color: const Color(0xFFFFD77B),
-                width: 2,
+                width: 1.8,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.amber.withOpacity(0.35),
-                  blurRadius: 20,
+                  color: Colors.amber.withOpacity(0.3),
+                  blurRadius: 15,
                 ),
               ],
             ),
@@ -469,13 +465,13 @@ class _GameScreenState extends State<GameScreen>
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 23,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  height: 1.35,
+                  height: 1.3,
                   shadows: [
                     Shadow(
                       color: Colors.black,
-                      blurRadius: 8,
+                      blurRadius: 6,
                     ),
                   ],
                 ),
@@ -497,17 +493,17 @@ class _GameScreenState extends State<GameScreen>
             Icons.groups_outlined,
             'الجمهور',
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           _buildHelpButton(
             Icons.phone_in_talk_outlined,
             'صديق',
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           _buildHelpButton(
             Icons.swap_horiz,
             'تبديل',
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           _buildHelpButton(
             Icons.percent,
             '50:50',
@@ -520,8 +516,8 @@ class _GameScreenState extends State<GameScreen>
   Widget _buildHelpButton(IconData icon, String label) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 8,
+        horizontal: 8,
+        vertical: 6,
       ),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -530,15 +526,15 @@ class _GameScreenState extends State<GameScreen>
             Color(0xFF06152C),
           ],
         ),
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: const Color(0xFF55CFFF),
-          width: 1.5,
+          width: 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.lightBlueAccent.withOpacity(0.3),
-            blurRadius: 12,
+            color: Colors.lightBlueAccent.withOpacity(0.25),
+            blurRadius: 8,
           ),
         ],
       ),
@@ -547,14 +543,14 @@ class _GameScreenState extends State<GameScreen>
         children: [
           Icon(
             icon,
-            size: 19,
+            size: 16,
             color: const Color(0xFFFFE6A1),
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 3),
           Text(
             label,
             style: const TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               color: Colors.white,
               fontWeight: FontWeight.bold,
             ),
@@ -584,17 +580,17 @@ class _GameScreenState extends State<GameScreen>
             ),
             border: Border.all(
               color: const Color(0xFFFFD27A),
-              width: 1.7,
+              width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.5),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
+                color: Colors.black.withOpacity(0.4),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -602,19 +598,19 @@ class _GameScreenState extends State<GameScreen>
                 labels[index],
                 style: const TextStyle(
                   color: Color(0xFFFFD77B),
-                  fontSize: 17,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: 2),
               Text(
                 answer,
                 textAlign: TextAlign.center,
-                maxLines: 3,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 17,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
               ),
