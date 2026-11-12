@@ -30,6 +30,10 @@ jobs:
           rm -rf temp_app/lib/*
           cp -r lib/* temp_app/lib/
           cp pubspec.yaml temp_app/
+          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' temp_app/android/app/build.gradle || true
+          if ! grep -q "minSdkVersion 21" temp_app/android/app/build.gradle; then
+            sed -i '/defaultConfig {/a \        minSdkVersion 21' temp_app/android/app/build.gradle
+          fi
           cd temp_app
           flutter pub get
 
