@@ -155,13 +155,13 @@ class _GameScreenState extends State<GameScreen>
                 ? _buildGameOver()
                 : Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
+                      horizontal: 8,
+                      vertical: 4,
                     ),
                     child: Column(
                       children: [
                         SizedBox(
-                          height: 65,
+                          height: 52,
                           child: Row(
                             mainAxisAlignment:
                                 MainAxisAlignment.spaceBetween,
@@ -174,16 +174,16 @@ class _GameScreenState extends State<GameScreen>
                                     'من سيربح المليار',
                                     style: TextStyle(
                                       color: Color(0xFFFFD77B),
-                                      fontSize: 16,
+                                      fontSize: 15,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  const SizedBox(height: 3),
+                                  const SizedBox(height: 2),
                                   Text(
                                     'السؤال ${currentQuestionIndex + 1} / ${arabicTriviaQuestions.length}',
                                     style: const TextStyle(
                                       color: Colors.white70,
-                                      fontSize: 12,
+                                      fontSize: 11,
                                     ),
                                   ),
                                 ],
@@ -193,19 +193,19 @@ class _GameScreenState extends State<GameScreen>
                           ),
                         ),
 
-                        const SizedBox(height: 5),
+                        const SizedBox(height: 4),
 
-                        // القسم الرئيسي: يحتوي على شجرة الجوائز في اليسار وباقي محتوى اللعبة في اليمين
+                        // القسم الرئيسي: شجرة الجوائز على اليسار وباقي المحتوى على اليمين بشكل متناسق
                         Expanded(
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              // شجرة الجوائز العمودية على جهة اليسار
+                              // شجرة الجوائز العمودية على اليسار (مضبوطة لـ 15 مستوى)
                               SizedBox(
-                                width: 95,
+                                width: 90,
                                 child: _buildPrizeLadder(),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 6),
 
                               // محتوى الأسئلة والاختيارات ووسائل المساعدة
                               Expanded(
@@ -215,21 +215,21 @@ class _GameScreenState extends State<GameScreen>
                                       flex: 3,
                                       child: AnimatedSwitcher(
                                         duration: const Duration(
-                                          milliseconds: 450,
+                                          milliseconds: 400,
                                         ),
                                         child: _buildQuestion(
                                           currentQ.questionText,
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: 6),
                                     SizedBox(
-                                      height: 50,
+                                      height: 38,
                                       child: Center(
                                         child: _buildHelpButtons(),
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: 6),
                                     Expanded(
                                       flex: 4,
                                       child: GridView.builder(
@@ -240,9 +240,9 @@ class _GameScreenState extends State<GameScreen>
                                         gridDelegate:
                                             const SliverGridDelegateWithFixedCrossAxisCount(
                                           crossAxisCount: 2,
-                                          childAspectRatio: 1.55,
-                                          crossAxisSpacing: 8,
-                                          mainAxisSpacing: 8,
+                                          childAspectRatio: 1.85,
+                                          crossAxisSpacing: 6,
+                                          mainAxisSpacing: 6,
                                         ),
                                         itemBuilder: (context, index) {
                                           return _buildAnswerButton(
@@ -283,21 +283,21 @@ class _GameScreenState extends State<GameScreen>
           color: Colors.amber.withOpacity(0.55),
           width: 1,
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.18),
-            blurRadius: 12,
+            color: Colors.blue.withOpacity(0.15),
+            blurRadius: 10,
           ),
         ],
       ),
       child: ListView.builder(
         reverse: true,
         padding: const EdgeInsets.symmetric(
-          horizontal: 6,
-          vertical: 6,
+          horizontal: 4,
+          vertical: 4,
         ),
-        itemCount: arabicTriviaQuestions.length,
+        itemCount: math.min(15, arabicTriviaQuestions.length),
         itemBuilder: (context, index) {
           final questionIndex = index;
 
@@ -308,10 +308,10 @@ class _GameScreenState extends State<GameScreen>
               questionIndex == currentQuestionIndex;
 
           return Container(
-            margin: const EdgeInsets.symmetric(vertical: 3),
+            margin: const EdgeInsets.symmetric(vertical: 2),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
-              height: 32,
+              height: 24,
               decoration: BoxDecoration(
                 gradient: isCurrent
                     ? const LinearGradient(
@@ -327,18 +327,18 @@ class _GameScreenState extends State<GameScreen>
                           Color(0xFF07162E),
                         ],
                       ),
-                borderRadius: BorderRadius.circular(7),
+                borderRadius: BorderRadius.circular(5),
                 border: Border.all(
                   color: isCurrent
                       ? const Color(0xFFFFE9A5)
                       : const Color(0xFF29466C),
-                  width: isCurrent ? 1.8 : 1,
+                  width: isCurrent ? 1.5 : 0.8,
                 ),
                 boxShadow: isCurrent
                     ? [
                         BoxShadow(
-                          color: Colors.amber.withOpacity(0.65),
-                          blurRadius: 8,
+                          color: Colors.amber.withOpacity(0.6),
+                          blurRadius: 6,
                           spreadRadius: 1,
                         ),
                       ]
@@ -346,7 +346,7 @@ class _GameScreenState extends State<GameScreen>
               ),
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 3),
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
@@ -355,7 +355,7 @@ class _GameScreenState extends State<GameScreen>
                         color: isCurrent
                             ? const Color(0xFF17100A)
                             : const Color(0xFFFFE6A1),
-                        fontSize: 13,
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -374,17 +374,17 @@ class _GameScreenState extends State<GameScreen>
         timeLeft <= 10 ? Colors.redAccent : const Color(0xFFFF7043);
 
     return Container(
-      width: 58,
-      height: 58,
-      padding: const EdgeInsets.all(3),
+      width: 48,
+      height: 48,
+      padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: const Color(0xFF071326),
         boxShadow: [
           BoxShadow(
             color: timerColor.withOpacity(0.35),
-            blurRadius: 14,
-            spreadRadius: 2,
+            blurRadius: 10,
+            spreadRadius: 1,
           ),
         ],
       ),
@@ -394,7 +394,7 @@ class _GameScreenState extends State<GameScreen>
           SizedBox.expand(
             child: CircularProgressIndicator(
               value: timeLeft / 30,
-              strokeWidth: 3.5,
+              strokeWidth: 3,
               backgroundColor: const Color(0xFF462D32),
               valueColor: AlwaysStoppedAnimation<Color>(
                 timerColor,
@@ -408,15 +408,15 @@ class _GameScreenState extends State<GameScreen>
                 'الوقت',
                 style: TextStyle(
                   color: Colors.white70,
-                  fontSize: 8,
+                  fontSize: 7,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                '$timeLeft ث',
+                '$timeLeft',
                 style: TextStyle(
                   color: timerColor,
-                  fontSize: 15,
+                  fontSize: 13,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -435,8 +435,8 @@ class _GameScreenState extends State<GameScreen>
           clipper: QuestionShapeClipper(),
           child: Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 10,
+              horizontal: 14,
+              vertical: 8,
             ),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
@@ -448,12 +448,12 @@ class _GameScreenState extends State<GameScreen>
               ),
               border: Border.all(
                 color: const Color(0xFFFFD77B),
-                width: 1.8,
+                width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.amber.withOpacity(0.3),
-                  blurRadius: 15,
+                  color: Colors.amber.withOpacity(0.25),
+                  blurRadius: 10,
                 ),
               ],
             ),
@@ -465,13 +465,13 @@ class _GameScreenState extends State<GameScreen>
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 18,
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
-                  height: 1.3,
+                  height: 1.25,
                   shadows: [
                     Shadow(
                       color: Colors.black,
-                      blurRadius: 6,
+                      blurRadius: 5,
                     ),
                   ],
                 ),
@@ -493,17 +493,17 @@ class _GameScreenState extends State<GameScreen>
             Icons.groups_outlined,
             'الجمهور',
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 5),
           _buildHelpButton(
             Icons.phone_in_talk_outlined,
             'صديق',
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 5),
           _buildHelpButton(
             Icons.swap_horiz,
             'تبديل',
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 5),
           _buildHelpButton(
             Icons.percent,
             '50:50',
@@ -516,8 +516,8 @@ class _GameScreenState extends State<GameScreen>
   Widget _buildHelpButton(IconData icon, String label) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 6,
+        horizontal: 7,
+        vertical: 4,
       ),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -526,15 +526,15 @@ class _GameScreenState extends State<GameScreen>
             Color(0xFF06152C),
           ],
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: const Color(0xFF55CFFF),
-          width: 1.2,
+          width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.lightBlueAccent.withOpacity(0.25),
-            blurRadius: 8,
+            color: Colors.lightBlueAccent.withOpacity(0.2),
+            blurRadius: 6,
           ),
         ],
       ),
@@ -543,14 +543,14 @@ class _GameScreenState extends State<GameScreen>
         children: [
           Icon(
             icon,
-            size: 16,
+            size: 14,
             color: const Color(0xFFFFE6A1),
           ),
           const SizedBox(width: 3),
           Text(
             label,
             style: const TextStyle(
-              fontSize: 11,
+              fontSize: 10,
               color: Colors.white,
               fontWeight: FontWeight.bold,
             ),
@@ -580,17 +580,17 @@ class _GameScreenState extends State<GameScreen>
             ),
             border: Border.all(
               color: const Color(0xFFFFD27A),
-              width: 1.5,
+              width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.4),
-                blurRadius: 6,
+                color: Colors.black.withOpacity(0.35),
+                blurRadius: 5,
                 offset: const Offset(0, 2),
               ),
             ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 6),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -598,11 +598,11 @@ class _GameScreenState extends State<GameScreen>
                 labels[index],
                 style: const TextStyle(
                   color: Color(0xFFFFD77B),
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 1),
               Text(
                 answer,
                 textAlign: TextAlign.center,
@@ -610,7 +610,7 @@ class _GameScreenState extends State<GameScreen>
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -624,8 +624,8 @@ class _GameScreenState extends State<GameScreen>
   Widget _buildGameOver() {
     return Center(
       child: Container(
-        margin: const EdgeInsets.all(25),
-        padding: const EdgeInsets.all(25),
+        margin: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [
@@ -633,15 +633,15 @@ class _GameScreenState extends State<GameScreen>
               Color(0xFF061329),
             ],
           ),
-          borderRadius: BorderRadius.circular(25),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: const Color(0xFFFFD77B),
-            width: 2,
+            width: 1.8,
           ),
           boxShadow: [
             BoxShadow(
               color: Colors.amber.withOpacity(0.2),
-              blurRadius: 25,
+              blurRadius: 20,
             ),
           ],
         ),
@@ -654,37 +654,37 @@ class _GameScreenState extends State<GameScreen>
                   : 'انتهت اللعبة!',
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 26,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Colors.amber,
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 15),
             Text(
               'مجموع أرباحك: \$${formatMoney(earnedMoney)}',
               style: const TextStyle(
-                fontSize: 22,
+                fontSize: 20,
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 25),
+            const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.amber[700],
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 40,
-                  vertical: 15,
+                  horizontal: 35,
+                  vertical: 12,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(25),
                 ),
               ),
               onPressed: restartGame,
               child: const Text(
                 'العب من جديد',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
                 ),
@@ -702,27 +702,27 @@ class _GameScreenState extends State<GameScreen>
       backgroundColor: const Color(0xFF07162F),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-          top: Radius.circular(25),
+          top: Radius.circular(20),
         ),
       ),
       builder: (context) {
         return Container(
-          padding: const EdgeInsets.all(20),
-          height: MediaQuery.of(context).size.height * 0.8,
+          padding: const EdgeInsets.all(15),
+          height: MediaQuery.of(context).size.height * 0.75,
           child: Column(
             children: [
               const Text(
                 'شجرة الجوائز والمبالغ',
                 style: TextStyle(
                   color: Colors.amber,
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const Divider(color: Colors.amber),
               Expanded(
                 child: ListView.builder(
-                  itemCount: arabicTriviaQuestions.length,
+                  itemCount: math.min(15, arabicTriviaQuestions.length),
                   reverse: true,
                   itemBuilder: (context, index) {
                     final prize =
@@ -732,16 +732,16 @@ class _GameScreenState extends State<GameScreen>
                         index == currentQuestionIndex;
 
                     return Container(
-                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      margin: const EdgeInsets.symmetric(vertical: 3),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
+                        horizontal: 12,
+                        vertical: 8,
                       ),
                       decoration: BoxDecoration(
                         color: isCurrent
                             ? Colors.amber.withOpacity(0.3)
                             : Colors.transparent,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                         border: isCurrent
                             ? Border.all(color: Colors.amber)
                             : null,
@@ -756,6 +756,7 @@ class _GameScreenState extends State<GameScreen>
                               color: isCurrent
                                   ? Colors.amber
                                   : Colors.white70,
+                              fontSize: 13,
                             ),
                           ),
                           Text(
@@ -765,7 +766,7 @@ class _GameScreenState extends State<GameScreen>
                                   ? Colors.amber
                                   : Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontSize: 14,
                             ),
                           ),
                         ],
