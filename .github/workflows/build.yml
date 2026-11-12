@@ -24,18 +24,18 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Create Clean Flutter Project (v2 Embedding)
+      - name: Create Clean Flutter Project & Copy Files
         run: |
-          cd ..
           flutter create temp_app --org com.arabictrivia --project-name arabic_trivia_millionaire
-          cp -r arabic_trivia_millionaire/lib/* temp_app/lib/
-          cp arabic_trivia_millionaire/pubspec.yaml temp_app/
+          rm -rf temp_app/lib/*
+          cp -r lib/* temp_app/lib/
+          cp pubspec.yaml temp_app/
           cd temp_app
           flutter pub get
 
       - name: Build APK & App Bundle
         run: |
-          cd ../temp_app
+          cd temp_app
           flutter build apk --release
           flutter build appbundle --release
 
@@ -43,10 +43,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: ../temp_app/build/app/outputs/flutter-apk/app-release.apk
+          path: temp_app/build/app/outputs/flutter-apk/app-release.apk
 
       - name: Upload AAB (App Bundle)
         uses: actions/upload-artifact@v4
         with:
           name: release-bundle
-          path: ../temp_app/build/app/outputs/bundle/release/app-release.aab
+          path: temp_app/build/app/outputs/bundle/release/app-release.aab
