@@ -161,7 +161,7 @@ class _GameScreenState extends State<GameScreen>
                     child: Column(
                       children: [
                         SizedBox(
-                          height: 52,
+                          height: 46,
                           child: Row(
                             mainAxisAlignment:
                                 MainAxisAlignment.spaceBetween,
@@ -174,16 +174,16 @@ class _GameScreenState extends State<GameScreen>
                                     'من سيربح المليار',
                                     style: TextStyle(
                                       color: Color(0xFFFFD77B),
-                                      fontSize: 15,
+                                      fontSize: 14,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  const SizedBox(height: 2),
+                                  const SizedBox(height: 1),
                                   Text(
                                     'السؤال ${currentQuestionIndex + 1} / ${arabicTriviaQuestions.length}',
                                     style: const TextStyle(
                                       color: Colors.white70,
-                                      fontSize: 11,
+                                      fontSize: 10,
                                     ),
                                   ),
                                 ],
@@ -193,16 +193,16 @@ class _GameScreenState extends State<GameScreen>
                           ),
                         ),
 
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
 
-                        // القسم الرئيسي: شجرة الجوائز على اليسار وباقي المحتوى على اليمين بشكل متناسق
+                        // القسم الرئيسي: شجرة الجوائز على اليسار وباقي المحتوى على اليمين بشكل متناسق ومضغوط
                         Expanded(
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               // شجرة الجوائز العمودية على اليسار (مضبوطة لـ 15 مستوى)
                               SizedBox(
-                                width: 90,
+                                width: 85,
                                 child: _buildPrizeLadder(),
                               ),
                               const SizedBox(width: 6),
@@ -210,28 +210,31 @@ class _GameScreenState extends State<GameScreen>
                               // محتوى الأسئلة والاختيارات ووسائل المساعدة
                               Expanded(
                                 child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   children: [
-                                    Expanded(
-                                      flex: 3,
+                                    // صندوق السؤال بحجم مضغوط وقريب للنص
+                                    SizedBox(
+                                      height: 110,
                                       child: AnimatedSwitcher(
                                         duration: const Duration(
-                                          milliseconds: 400,
+                                          milliseconds: 300,
                                         ),
                                         child: _buildQuestion(
                                           currentQ.questionText,
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(height: 6),
+                                    const SizedBox(height: 2),
                                     SizedBox(
-                                      height: 38,
+                                      height: 34,
                                       child: Center(
                                         child: _buildHelpButtons(),
                                       ),
                                     ),
-                                    const SizedBox(height: 6),
-                                    Expanded(
-                                      flex: 4,
+                                    const SizedBox(height: 2),
+                                    // اختيارات بحجم أصغر ومتناسق تماماً
+                                    SizedBox(
+                                      height: 165,
                                       child: GridView.builder(
                                         physics:
                                             const NeverScrollableScrollPhysics(),
@@ -240,9 +243,9 @@ class _GameScreenState extends State<GameScreen>
                                         gridDelegate:
                                             const SliverGridDelegateWithFixedCrossAxisCount(
                                           crossAxisCount: 2,
-                                          childAspectRatio: 1.85,
-                                          crossAxisSpacing: 6,
-                                          mainAxisSpacing: 6,
+                                          childAspectRatio: 2.3,
+                                          crossAxisSpacing: 5,
+                                          mainAxisSpacing: 5,
                                         ),
                                         itemBuilder: (context, index) {
                                           return _buildAnswerButton(
@@ -294,8 +297,8 @@ class _GameScreenState extends State<GameScreen>
       child: ListView.builder(
         reverse: true,
         padding: const EdgeInsets.symmetric(
-          horizontal: 4,
-          vertical: 4,
+          horizontal: 3,
+          vertical: 3,
         ),
         itemCount: math.min(15, arabicTriviaQuestions.length),
         itemBuilder: (context, index) {
@@ -308,10 +311,10 @@ class _GameScreenState extends State<GameScreen>
               questionIndex == currentQuestionIndex;
 
           return Container(
-            margin: const EdgeInsets.symmetric(vertical: 2),
+            margin: const EdgeInsets.symmetric(vertical: 1.5),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
-              height: 24,
+              height: 21,
               decoration: BoxDecoration(
                 gradient: isCurrent
                     ? const LinearGradient(
@@ -327,7 +330,7 @@ class _GameScreenState extends State<GameScreen>
                           Color(0xFF07162E),
                         ],
                       ),
-                borderRadius: BorderRadius.circular(5),
+                borderRadius: BorderRadius.circular(4),
                 border: Border.all(
                   color: isCurrent
                       ? const Color(0xFFFFE9A5)
@@ -338,7 +341,7 @@ class _GameScreenState extends State<GameScreen>
                     ? [
                         BoxShadow(
                           color: Colors.amber.withOpacity(0.6),
-                          blurRadius: 6,
+                          blurRadius: 5,
                           spreadRadius: 1,
                         ),
                       ]
@@ -346,7 +349,7 @@ class _GameScreenState extends State<GameScreen>
               ),
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 3),
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
@@ -355,7 +358,7 @@ class _GameScreenState extends State<GameScreen>
                         color: isCurrent
                             ? const Color(0xFF17100A)
                             : const Color(0xFFFFE6A1),
-                        fontSize: 11,
+                        fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -374,8 +377,8 @@ class _GameScreenState extends State<GameScreen>
         timeLeft <= 10 ? Colors.redAccent : const Color(0xFFFF7043);
 
     return Container(
-      width: 48,
-      height: 48,
+      width: 42,
+      height: 42,
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
@@ -383,7 +386,7 @@ class _GameScreenState extends State<GameScreen>
         boxShadow: [
           BoxShadow(
             color: timerColor.withOpacity(0.35),
-            blurRadius: 10,
+            blurRadius: 8,
             spreadRadius: 1,
           ),
         ],
@@ -394,7 +397,7 @@ class _GameScreenState extends State<GameScreen>
           SizedBox.expand(
             child: CircularProgressIndicator(
               value: timeLeft / 30,
-              strokeWidth: 3,
+              strokeWidth: 2.5,
               backgroundColor: const Color(0xFF462D32),
               valueColor: AlwaysStoppedAnimation<Color>(
                 timerColor,
@@ -408,7 +411,7 @@ class _GameScreenState extends State<GameScreen>
                 'الوقت',
                 style: TextStyle(
                   color: Colors.white70,
-                  fontSize: 7,
+                  fontSize: 6,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -416,7 +419,7 @@ class _GameScreenState extends State<GameScreen>
                 '$timeLeft',
                 style: TextStyle(
                   color: timerColor,
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -435,8 +438,8 @@ class _GameScreenState extends State<GameScreen>
           clipper: QuestionShapeClipper(),
           child: Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 8,
+              horizontal: 12,
+              vertical: 6,
             ),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
@@ -448,12 +451,12 @@ class _GameScreenState extends State<GameScreen>
               ),
               border: Border.all(
                 color: const Color(0xFFFFD77B),
-                width: 1.5,
+                width: 1.4,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.amber.withOpacity(0.25),
-                  blurRadius: 10,
+                  color: Colors.amber.withOpacity(0.2),
+                  blurRadius: 8,
                 ),
               ],
             ),
@@ -461,17 +464,17 @@ class _GameScreenState extends State<GameScreen>
               child: Text(
                 question,
                 textAlign: TextAlign.center,
-                maxLines: 4,
+                maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 15,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  height: 1.25,
+                  height: 1.2,
                   shadows: [
                     Shadow(
                       color: Colors.black,
-                      blurRadius: 5,
+                      blurRadius: 4,
                     ),
                   ],
                 ),
@@ -493,17 +496,17 @@ class _GameScreenState extends State<GameScreen>
             Icons.groups_outlined,
             'الجمهور',
           ),
-          const SizedBox(width: 5),
+          const SizedBox(width: 4),
           _buildHelpButton(
             Icons.phone_in_talk_outlined,
             'صديق',
           ),
-          const SizedBox(width: 5),
+          const SizedBox(width: 4),
           _buildHelpButton(
             Icons.swap_horiz,
             'تبديل',
           ),
-          const SizedBox(width: 5),
+          const SizedBox(width: 4),
           _buildHelpButton(
             Icons.percent,
             '50:50',
@@ -516,8 +519,8 @@ class _GameScreenState extends State<GameScreen>
   Widget _buildHelpButton(IconData icon, String label) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 7,
-        vertical: 4,
+        horizontal: 6,
+        vertical: 3,
       ),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -526,15 +529,15 @@ class _GameScreenState extends State<GameScreen>
             Color(0xFF06152C),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: const Color(0xFF55CFFF),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.lightBlueAccent.withOpacity(0.2),
-            blurRadius: 6,
+            color: Colors.lightBlueAccent.withOpacity(0.15),
+            blurRadius: 5,
           ),
         ],
       ),
@@ -543,14 +546,14 @@ class _GameScreenState extends State<GameScreen>
         children: [
           Icon(
             icon,
-            size: 14,
+            size: 13,
             color: const Color(0xFFFFE6A1),
           ),
-          const SizedBox(width: 3),
+          const SizedBox(width: 2),
           Text(
             label,
             style: const TextStyle(
-              fontSize: 10,
+              fontSize: 9,
               color: Colors.white,
               fontWeight: FontWeight.bold,
             ),
@@ -580,17 +583,17 @@ class _GameScreenState extends State<GameScreen>
             ),
             border: Border.all(
               color: const Color(0xFFFFD27A),
-              width: 1.2,
+              width: 1.1,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.35),
-                blurRadius: 5,
-                offset: const Offset(0, 2),
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 4,
+                offset: const Offset(0, 1),
               ),
             ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -598,7 +601,7 @@ class _GameScreenState extends State<GameScreen>
                 labels[index],
                 style: const TextStyle(
                   color: Color(0xFFFFD77B),
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -610,7 +613,7 @@ class _GameScreenState extends State<GameScreen>
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: FontWeight.bold,
                 ),
               ),
