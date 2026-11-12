@@ -34,6 +34,10 @@ jobs:
           if ! grep -q "minSdkVersion 21" temp_app/android/app/build.gradle; then
             sed -i '/defaultConfig {/a \        minSdkVersion 21' temp_app/android/app/build.gradle
           fi
+          sed -i "s/ext.kotlin_version = '.*'/ext.kotlin_version = '1.9.24'/g" temp_app/android/build.gradle || true
+          if ! grep -q "ext.kotlin_version" temp_app/android/build.gradle; then
+            sed -i "1i buildscript { ext.kotlin_version = '1.9.24' }" temp_app/android/build.gradle
+          fi
           cd temp_app
           flutter pub get
 
