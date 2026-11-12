@@ -27,17 +27,26 @@ jobs:
       - name: Create Clean Flutter Project & Copy Files
         run: |
           flutter create temp_app --org com.arabictrivia --project-name arabic_trivia_millionaire
+
           rm -rf temp_app/lib/*
           cp -r lib/* temp_app/lib/
           cp pubspec.yaml temp_app/
+
           sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' temp_app/android/app/build.gradle || true
+
           if ! grep -q "minSdkVersion 21" temp_app/android/app/build.gradle; then
             sed -i '/defaultConfig {/a \        minSdkVersion 21' temp_app/android/app/build.gradle
           fi
+
           sed -i "s/ext.kotlin_version = '.*'/ext.kotlin_version = '1.9.24'/g" temp_app/android/build.gradle || true
+
           if ! grep -q "ext.kotlin_version" temp_app/android/build.gradle; then
             sed -i "1i buildscript { ext.kotlin_version = '1.9.24' }" temp_app/android/build.gradle
           fi
+
+          sed -i "s/id 'org.jetbrains.kotlin.android' version '[^']*'/id 'org.jetbrains.kotlin.android' version '1.9.24'/g" temp_app/android/settings.gradle
+          sed -i 's/id "org.jetbrains.kotlin.android" version "[^"]*"/id "org.jetbrains.kotlin.android" version "1.9.24"/g' temp_app/android/settings.gradle
+
           cd temp_app
           flutter pub get
 
