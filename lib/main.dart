@@ -214,7 +214,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                         ),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(30),
                         border: Border.all(color: Colors.amber, width: 2),
                         boxShadow: [
                           BoxShadow(
@@ -231,21 +231,38 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 35),
+                  const SizedBox(height: 25),
 
-                  // خيارات الإجابة (جنباً إلى جنب - شبكية مثل البرنامج الأصلي)
+                  // وسائل المساعدة (حسب الصورة الاحترافية)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildHelpButton(Icons.people, 'الجمهور'),
+                      const SizedBox(width: 15),
+                      _buildHelpButton(Icons.phone, 'صديق'),
+                      const SizedBox(width: 15),
+                      _buildHelpButton(Icons.tv, 'جمهور'),
+                      const SizedBox(width: 15),
+                      _buildHelpButton(Icons.close, '50:50'),
+                    ],
+                  ),
+                  const SizedBox(height: 25),
+
+                  // خيارات الإجابة (جنباً إلى جنب - شبكية احترافية مثل الصورة)
                   Expanded(
                     child: GridView.builder(
                       itemCount: currentQ.options.length,
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 1, // أو اجعلها 2 إذا أردت جنباً إلى جنب، سنرتبها بشكل مستطيلات أفقية واسعة فاخرة
-                        childAspectRatio: 4.2,
+                        crossAxisCount: 2, // خيارين في كل صف تماماً مثل الصورة
+                        childAspectRatio: 2.5,
+                        crossAxisSpacing: 12,
                         mainAxisSpacing: 12,
                       ),
                       itemBuilder: (context, index) {
+                        List<String> labels = ['A.', 'B.', 'C.', 'D.'];
                         return InkWell(
                           onTap: () => answerQuestion(index),
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(30),
                           child: Container(
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
@@ -253,8 +270,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                 begin: Alignment.centerLeft,
                                 end: Alignment.centerRight,
                               ),
-                              borderRadius: BorderRadius.circular(15),
-                              border: Border.all(color: Colors.amber.withOpacity(0.6), width: 1.5),
+                              borderRadius: BorderRadius.circular(30),
+                              border: Border.all(color: Colors.amber.withOpacity(0.7), width: 1.5),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.3),
@@ -263,27 +280,26 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                 ),
                               ],
                             ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    ['A', 'B', 'C', 'D'][index],
-                                    style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 18),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    labels[index],
+                                    style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 16),
                                   ),
-                                ),
-                                Container(height: 30, width: 1, color: Colors.amber.withOpacity(0.3)),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  const SizedBox(width: 8),
+                                  Expanded(
                                     child: Text(
                                       currentQ.options[index],
-                                      style: const TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.w500),
+                                      style: const TextStyle(fontSize: 15, color: Colors.white, fontWeight: FontWeight.w500),
+                                      textAlign: TextAlign.center,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         );
@@ -293,6 +309,25 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 ],
               ),
             ),
+    );
+  }
+
+  // ودجت أزرار المساعدة العلوية
+  Widget _buildHelpButton(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.amber.withOpacity(0.6)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: Colors.amber),
+          const SizedBox(width: 4),
+          Text(label, style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.bold)),
+        ],
+      ),
     );
   }
 
