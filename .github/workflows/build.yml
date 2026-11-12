@@ -28,6 +28,18 @@ jobs:
         run: |
           flutter create temp_app --org com.arabictrivia --project-name arabic_trivia_millionaire
 
+          python3 - <<'PY'
+          from pathlib import Path
+          manifest = Path("temp_app/android/app/src/main/AndroidManifest.xml")
+          text = manifest.read_text()
+          if "com.google.android.gms.ads.APPLICATION_ID" not in text:
+              text = text.replace(
+                  "</application>",
+                  '        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-3940256099942544~3347511713"/>\n    </application>'
+              )
+          manifest.write_text(text)
+          PY
+
           rm -rf temp_app/lib/*
           cp -r lib/* temp_app/lib/
           cp pubspec.yaml temp_app/
