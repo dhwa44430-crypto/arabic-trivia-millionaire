@@ -10,7 +10,6 @@ dependencies:
   flutter:
     sdk: flutter
   google_mobile_ads: ^5.1.0
-  wortise: ^1.2.0
 
 dev_dependencies:
   flutter_test:
