@@ -214,6 +214,7 @@ class _GameScreenState extends State<GameScreen>
             _isAdLoaded = false;
           });
           // إعادة المحاولة في حال الفشل
+          _loadRewardedAd();
         },
       ),
     );
@@ -491,8 +492,10 @@ class _GameScreenState extends State<GameScreen>
             // فحص فوري عند فتح النافذة
             if (_isAdLoaded && _rewardedAd != null) {
               searchTimer?.cancel();
-              Navigator.pop(dialogContext);
-              _executeAdOrChangeQuestion();
+              if (Navigator.canPop(dialogContext)) {
+                Navigator.pop(dialogContext);
+              }
+              _showAndPlayAd();
               return const SizedBox.shrink();
             }
 
@@ -504,7 +507,7 @@ class _GameScreenState extends State<GameScreen>
                 if (Navigator.canPop(dialogContext)) {
                   Navigator.pop(dialogContext); // إغلاق نافذة البحث فوراً
                 }
-                _executeAdOrChangeQuestion();
+                _showAndPlayAd();
                 return;
               }
 
@@ -517,8 +520,8 @@ class _GameScreenState extends State<GameScreen>
                 if (Navigator.canPop(dialogContext)) {
                   Navigator.pop(dialogContext); // إغلاق نافذة البحث بعد انتهاء الـ 10 ثوانٍ
                 }
-                // تنفيذ الإعلان أو تغيير السؤال بعد انقضاء مهلة الـ 10 ثوانٍ
-                _executeAdOrChangeQuestion();
+                // إذا انتهت ال10 ثوانٍ ولم يوجد إعلان: إظهار رسالة التنبيه وعدم تغيير السؤال وعدم استهلاك الزر
+                _handleNoAdAvailable();
               }
             });
 
@@ -554,14 +557,14 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  // تنفيذ عرض الإعلان أو تغيير السؤال
-  void _executeAdOrChangeQuestion() {
+  // دالة عرض وتشغيل الإعلان بنجاح وتغيير السؤال
+  void _showAndPlayAd() {
     if (_isAdLoaded && _rewardedAd != null) {
       _rewardedAd!.show(
         onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
           // تم مشاهدة الإعلان بالكامل بنجاح من قبل المستخدم
           setState(() {
-            isPhoneUsed = true;
+            isPhoneUsed = true; // يتم استهلاك المساعدة فقط عند مشاهدة الإعلان بنجاح
             hiddenOptions.clear();
             final random = math.Random();
             List<Question> pool = List.from(arabicTriviaQuestions);
@@ -579,20 +582,56 @@ class _GameScreenState extends State<GameScreen>
         },
       );
     } else {
-      // في حال لم يكتمل تحميل الإعلان لسبب ما، يتم تغيير السؤال مباشرة وتنبيه اللاعب وبدء العد من جديد
-      setState(() {
-        isPhoneUsed = true;
-        hiddenOptions.clear();
-        final random = math.Random();
-        List<Question> pool = List.from(arabicTriviaQuestions);
-        pool.shuffle(random);
-        if (pool.isNotEmpty) {
-          sessionQuestions[currentQuestionIndex] = pool.first;
-        }
-      });
-      _showQuestionChangedDialog();
-      _loadRewardedAd();
+      _handleNoAdAvailable();
     }
+  }
+
+  // في حال لم يتوفر إعلان (انقطع الإنترنت أو لم يتم التحميل): لا يتغير السؤال وتظهر رسالة التنبيه الاحترافية
+  void _handleNoAdAvailable() {
+    // إعادة محاولة تحميل الإعلان خلف الكواليس للمحاولة القادمة
+    _loadRewardedAd();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF0F172A),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: Colors.redAccent, width: 1.5),
+          ),
+          title: const Text(
+            'تنبيه',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 20),
+          ),
+          content: const Text(
+            'لا يوجد اعلان حاول الاتصال بالانرتيت وحاول مجددا',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white, fontSize: 16, height: 1.4),
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.amber[700],
+                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                startTimer(); // استئناف عداد السؤال الحالي دون تغييره وبقاء الزر متاحاً للمحاولة مرة أخرى
+              },
+              child: const Text(
+                'حسناً',
+                style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showQuestionChangedDialog() {
