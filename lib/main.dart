@@ -142,7 +142,7 @@ class _GameScreenState extends State<GameScreen>
 
   // متغيرات تتبع وسائل المساعدة (لكي تستخدم مرة واحدة فقط)
   bool isAudienceUsed = false;
-  bool isPhoneUsed = false; // تتبع استخدام إعلان المكافأة الربحي
+  bool isPhoneUsed = false; // تتبع استخدام فرصة ثانية (إعلان المكافأة)
   bool isSwapUsed = false;
   bool isFiftyFiftyUsed = false;
 
@@ -430,7 +430,7 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  // نافذة منبثقة بالصيغة المطلوبة "شاهد اعلان لتغير السؤال" مع زر "حسناً" وتوقيف العداد مؤقتاً
+  // نافذة "فرصة ثانية" مع توقيف العداد مؤقتاً
   void useRewardedAdHelp() {
     if (isPhoneUsed) return;
 
@@ -461,46 +461,10 @@ class _GameScreenState extends State<GameScreen>
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
               ),
               onPressed: () {
-                Navigator.pop(context); // إغلاق النافذة المنبثقة
+                Navigator.pop(context); // إغلاق نافذة الاختيار الأول
 
-                // تشغيل إعلان أدموب الحقيقي إذا تم تحميله بنجاح
-                if (_isAdLoaded && _rewardedAd != null) {
-                  _rewardedAd!.show(
-                    onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
-                      // تم مشاهدة الإعلان بالكامل بنجاح من قبل المستخدم
-                      setState(() {
-                        isPhoneUsed = true;
-                        hiddenOptions.clear();
-                        final random = math.Random();
-                        List<Question> pool = List.from(arabicTriviaQuestions);
-                        pool.shuffle(random);
-                        if (pool.isNotEmpty) {
-                          sessionQuestions[currentQuestionIndex] = pool.first;
-                        }
-                      });
-
-                      // إظهار رسالة منبثقة "تم تغير السؤال" بعد انتهاء الإعلان وبدء العد من جديد
-                      _showQuestionChangedDialog();
-                      
-                      // إعادة تحميل إعلان جديد للمرة القادمة
-                      _loadRewardedAd();
-                    },
-                  );
-                } else {
-                  // في حال لم يكتمل تحميل الإعلان لسبب ما، يتم تغيير السؤال مباشرة وتنبيه اللاعب وبدء العد من جديد
-                  setState(() {
-                    isPhoneUsed = true;
-                    hiddenOptions.clear();
-                    final random = math.Random();
-                    List<Question> pool = List.from(arabicTriviaQuestions);
-                    pool.shuffle(random);
-                    if (pool.isNotEmpty) {
-                      sessionQuestions[currentQuestionIndex] = pool.first;
-                    }
-                  });
-                  _showQuestionChangedDialog();
-                  _loadRewardedAd();
-                }
+                // إظهار نافذة عداد مدته 10 ثوانٍ للبحث عن الإعلان وتحميله
+                _showAdSearchingDialog();
               },
               child: const Text(
                 'حسناً',
@@ -511,6 +475,105 @@ class _GameScreenState extends State<GameScreen>
         );
       },
     );
+  }
+
+  // دالة عرض نافذة البحث عن الإعلان لمدة 10 ثوانٍ
+  void _showAdSearchingDialog() {
+    int searchTimeLeft = 10;
+    Timer? searchTimer;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            // تشغيل مؤقت لمدة 10 ثوانٍ
+            searchTimer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
+              if (searchTimeLeft > 1) {
+                setStateDialog(() {
+                  searchTimeLeft--;
+                });
+              } else {
+                timer.cancel();
+                Navigator.pop(dialogContext); // إغلاق نافذة البحث تلقائياً بعد 10 ثوانٍ
+
+                // تنفيذ عرض الإعلان الفعلي أو تغيير السؤال بعد انتهاء الـ 10 ثوانٍ
+                _executeAdOrChangeQuestion();
+              }
+            });
+
+            return AlertDialog(
+              backgroundColor: const Color(0xFF0F172A),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: const BorderSide(color: Colors.amber, width: 1.5),
+              ),
+              title: const Text(
+                'جاري البحث عن إعلان...',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 10),
+                  const CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'يرجى الانتظار ($searchTimeLeft ثوانٍ)',
+                    style: const TextStyle(color: Colors.white70, fontSize: 15),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // تنفيذ عرض الإعلان أو تغيير السؤال مباشرة بعد انتهاء الـ 10 ثوانٍ
+  void _executeAdOrChangeQuestion() {
+    if (_isAdLoaded && _rewardedAd != null) {
+      _rewardedAd!.show(
+        onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
+          // تم مشاهدة الإعلان بالكامل بنجاح من قبل المستخدم
+          setState(() {
+            isPhoneUsed = true;
+            hiddenOptions.clear();
+            final random = math.Random();
+            List<Question> pool = List.from(arabicTriviaQuestions);
+            pool.shuffle(random);
+            if (pool.isNotEmpty) {
+              sessionQuestions[currentQuestionIndex] = pool.first;
+            }
+          });
+
+          // إظهار رسالة منبثقة "تم تغير السؤال" بعد انتهاء الإعلان وبدء العد من جديد
+          _showQuestionChangedDialog();
+          
+          // إعادة تحميل إعلان جديد للمرة القادمة
+          _loadRewardedAd();
+        },
+      );
+    } else {
+      // في حال لم يكتمل تحميل الإعلان لسبب ما، يتم تغيير السؤال مباشرة وتنبيه اللاعب وبدء العد من جديد
+      setState(() {
+        isPhoneUsed = true;
+        hiddenOptions.clear();
+        final random = math.Random();
+        List<Question> pool = List.from(arabicTriviaQuestions);
+        pool.shuffle(random);
+        if (pool.isNotEmpty) {
+          sessionQuestions[currentQuestionIndex] = pool.first;
+        }
+      });
+      _showQuestionChangedDialog();
+      _loadRewardedAd();
+    }
   }
 
   void _showQuestionChangedDialog() {
@@ -700,7 +763,7 @@ class _GameScreenState extends State<GameScreen>
                                 child: _buildCurrentPrizeBox(currentPrize),
                               ),
                               const SizedBox(height: 12),
-                              // أزرار المساعدة التفاعلية (مع إعلان أدموب الربحي)
+                              // أزرار المساعدة التفاعلية (مع فرصة ثانية)
                               SizedBox(
                                 height: 46,
                                 child: Center(
@@ -1072,10 +1135,10 @@ class _GameScreenState extends State<GameScreen>
           ),
           const SizedBox(width: 8),
           _buildHelpButton(
-            Icons.play_circle_outline, // أيقونة إعلان أدموب
-            'إعلان ربحي', // التسمية الجديدة
+            Icons.replay, // أيقونة مناسبة لفرصة ثانية
+            'فرصة ثانية', // التسمية الجديدة
             isPhoneUsed,
-            useRewardedAdHelp, // دالة عرض إعلان أدموب الحقيقي
+            useRewardedAdHelp, // دالة عرض إعلان فرصة ثانية
           ),
           const SizedBox(width: 8),
           _buildHelpButton(
