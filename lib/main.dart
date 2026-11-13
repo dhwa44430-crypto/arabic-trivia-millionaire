@@ -136,6 +136,15 @@ class _GameScreenState extends State<GameScreen>
   bool hasWon = false;
   int earnedMoney = 0;
 
+  // متغيرات تتبع وسائل المساعدة (لكي تستخدم مرة واحدة فقط)
+  bool isAudienceUsed = false;
+  bool isPhoneUsed = false;
+  bool isSwapUsed = false;
+  bool isFiftyFiftyUsed = false;
+
+  // متغيرات خاصة بحذف خيارين (50:50)
+  Set<int> hiddenOptions = {};
+
   // قائمة لتخزين الأسئلة الخاصة بالجلسة الحالية بدون تكرار
   List<Question> sessionQuestions = [];
 
@@ -213,6 +222,8 @@ class _GameScreenState extends State<GameScreen>
   }
 
   void answerQuestion(int selectedIndex) {
+    if (hiddenOptions.contains(selectedIndex)) return; // منع الضغط على الخيار المحذوف
+
     _timer?.cancel();
 
     bool isCorrect = selectedIndex ==
@@ -229,6 +240,7 @@ class _GameScreenState extends State<GameScreen>
       setState(() {
         earnedMoney = currentPrize;
         currentStudioMessage = StudioContentManager.getRandomMessage();
+        hiddenOptions.clear(); // إعادة تعيين الخيارات المخفية للسؤال التالي
       });
 
       _showCorrectAnswerDialog(currentPrize, isLastQuestion);
@@ -302,12 +314,191 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
+  // دوال تفعيل وسائل المساعدة وعرض النوافذ المنبثقة
+  void useAudienceHelp() {
+    if (isAudienceUsed) return;
+    setState(() {
+      isAudienceUsed = true;
+    });
+
+    final currentQ = sessionQuestions[currentQuestionIndex];
+    final correctIndex = currentQ.correctAnswerIndex;
+    final random = math.Random();
+
+    // توليد نسب تصويت عشوائية بحيث تكون الإجابة الصحيحة هي الأعلى نسبياً
+    List<int> percents = [0, 0, 0, 0];
+    int correctPercent = random.nextInt(30) + 50; // بين 50% و 80%
+    percents[correctIndex] = correctPercent;
+    int remaining = 100 - correctPercent;
+
+    for (int i = 0; i < 4; i++) {
+      if (i != correctIndex) {
+        if (i == 3 || (i == 2 && correctIndex == 3)) {
+          percents[i] = remaining;
+        } else {
+          int p = random.nextInt(remaining + 1);
+          percents[i] = p;
+          remaining -= p;
+        }
+      }
+    }
+
+    const labels = ['A', 'B', 'C', 'D'];
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF0F172A),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: Colors.amber, width: 1.5),
+          ),
+          title: const Text(
+            '👥 رأي الجمهور 👥',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 20),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(4, (index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Text('${labels[index]}: ', style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold)),
+                    Expanded(
+                      child: LinearProgressIndicator(
+                        value: percents[index] / 100,
+                        backgroundColor: Colors.white24,
+                        valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text('${percents[index]}%', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              );
+            }),
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.amber[700]),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('إغلاق', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void usePhoneHelp() {
+    if (isPhoneUsed) return;
+    setState(() {
+      isPhoneUsed = true;
+    });
+
+    final currentQ = sessionQuestions[currentQuestionIndex];
+    final correctIndex = currentQ.correctAnswerIndex;
+    const labels = ['A', 'B', 'C', 'D'];
+    final random = math.Random();
+
+    // احتمال 85% أن يكون الصديق على صواب
+    int suggestedIndex = (random.nextDouble() < 0.85) ? correctIndex : random.nextInt(4);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF0F172A),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: Colors.amber, width: 1.5),
+          ),
+          title: const Text(
+            '📞 اتصال بصديق 📞',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 20),
+          ),
+          content: Text(
+            'الصديق المقرب يقول:\n\n"أنا متأكد بنسبة كبيرة أن الإجابة الصحيحة هي الخيار (${labels[suggestedIndex]}) يا صديقي!"',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white70, fontSize: 15, height: 1.4),
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.amber[700]),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('شكراً للصديق', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void useSwapHelp() {
+    if (isSwapUsed) return;
+    setState(() {
+      isSwapUsed = true;
+      hiddenOptions.clear();
+      // استبدال السؤال الحالي بسؤال جديد عشوائي من القائمة
+      final random = math.Random();
+      List<Question> pool = List.from(arabicTriviaQuestions);
+      pool.shuffle(random);
+      if (pool.isNotEmpty) {
+        sessionQuestions[currentQuestionIndex] = pool.first;
+      }
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('تم تبديل السؤال بنجاح!', textAlign: TextAlign.center),
+        backgroundColor: Colors.amber,
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void useFiftyFiftyHelp() {
+    if (isFiftyFiftyUsed) return;
+    setState(() {
+      isFiftyFiftyUsed = true;
+      final currentQ = sessionQuestions[currentQuestionIndex];
+      final correctIndex = currentQ.correctAnswerIndex;
+      final random = math.Random();
+
+      List<int> wrongIndices = [];
+      for (int i = 0; i < currentQ.options.length; i++) {
+        if (i != correctIndex) {
+          wrongIndices.add(i);
+        }
+      }
+      wrongIndices.shuffle(random);
+      // إخفاء خطأين عشوائيين لتبقي الإجابة الصحيحة وخطأ واحد
+      if (wrongIndices.isNotEmpty) {
+        hiddenOptions.add(wrongIndices[0]);
+        if (wrongIndices.length > 1) {
+          hiddenOptions.add(wrongIndices[1]);
+        }
+      }
+    });
+  }
+
   void restartGame() {
     setState(() {
       currentQuestionIndex = 0;
       isGameOver = false;
       hasWon = false;
       earnedMoney = 0;
+      isAudienceUsed = false;
+      isPhoneUsed = false;
+      isSwapUsed = false;
+      isFiftyFiftyUsed = false;
+      hiddenOptions.clear();
       _initializeGameQuestions();
       currentStudioMessage = StudioContentManager.getRandomMessage();
     });
@@ -404,7 +595,7 @@ class _GameScreenState extends State<GameScreen>
                                 child: _buildCurrentPrizeBox(currentPrize),
                               ),
                               const SizedBox(height: 12),
-                              // أزرار المساعدة
+                              // أزرار المساعدة التفاعلية
                               SizedBox(
                                 height: 46,
                                 child: Center(
@@ -771,70 +962,84 @@ class _GameScreenState extends State<GameScreen>
           _buildHelpButton(
             Icons.groups_outlined,
             'الجمهور',
+            isAudienceUsed,
+            useAudienceHelp,
           ),
           const SizedBox(width: 8),
           _buildHelpButton(
             Icons.phone_in_talk_outlined,
             'صديق',
+            isPhoneUsed,
+            usePhoneHelp,
           ),
           const SizedBox(width: 8),
           _buildHelpButton(
             Icons.swap_horiz,
             'تبديل',
+            isSwapUsed,
+            useSwapHelp,
           ),
           const SizedBox(width: 8),
           _buildHelpButton(
             Icons.percent,
             '50:50',
+            isFiftyFiftyUsed,
+            useFiftyFiftyHelp,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildHelpButton(IconData icon, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 6,
-      ),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFF15365D),
-            Color(0xFF06152C),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: const Color(0xFF55CFFF),
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.lightBlueAccent.withOpacity(0.2),
-            blurRadius: 6,
+  Widget _buildHelpButton(IconData icon, String label, bool isUsed, VoidCallback onTap) {
+    return Opacity(
+      opacity: isUsed ? 0.4 : 1.0,
+      child: InkWell(
+        onTap: isUsed ? null : onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 6,
           ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 16,
-            color: const Color(0xFFFFE6A1),
-          ),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [
+                Color(0xFF15365D),
+                Color(0xFF06152C),
+              ],
             ),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isUsed ? Colors.grey : const Color(0xFF55CFFF),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.lightBlueAccent.withOpacity(0.2),
+                blurRadius: 6,
+              ),
+            ],
           ),
-        ],
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: isUsed ? Colors.grey : const Color(0xFFFFE6A1),
+              ),
+              const SizedBox(width: 5),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isUsed ? Colors.grey : Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -842,6 +1047,11 @@ class _GameScreenState extends State<GameScreen>
   // أزرار الإجابات مع الحفاظ على الشكل الأصلي وإطار ذهبي يحيط به بالكامل من الأربع جهات
   Widget _buildAnswerButton(int index, String answer) {
     const labels = ['A.', 'B.', 'C.', 'D.'];
+    bool isHidden = hiddenOptions.contains(index);
+
+    if (isHidden) {
+      return const SizedBox.shrink(); // إخفاء الخيار في حال تم استخدام 50:50
+    }
 
     return InkWell(
       onTap: () => answerQuestion(index),
