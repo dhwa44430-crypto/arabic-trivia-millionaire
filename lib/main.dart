@@ -401,9 +401,9 @@ class _GameScreenState extends State<GameScreen>
                                 child: _buildGameProgressBar(),
                               ),
                               const SizedBox(height: 8),
-                              // المستطيل الاحترافي الجديد للجمهور والحكم مع أنيميشن ناعم (مباشرة تحت شريط النقاط الدوائر)
+                              // المستطيل الاحترافي الجديد للجمهور والحكم مع زيادة الارتفاع ليحتوي النص كاملاً بدون أي اختفاء
                               SizedBox(
-                                height: 46,
+                                height: 62,
                                 child: _buildProfessionalStudioMessageCard(),
                               ),
                             ],
@@ -418,7 +418,7 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  // مستطيل احترافي أنيق للجمهور والحكم والمعلومات مع أنيميشن حركي سلس
+  // مستطيل احترافي أنيق للجمهور والحكم والمعلومات مع أنيميشن حركي سلس وارتفاع كافٍ
   Widget _buildProfessionalStudioMessageCard() {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 600),
@@ -437,7 +437,7 @@ class _GameScreenState extends State<GameScreen>
       child: Container(
         key: ValueKey<String>(currentStudioMessage),
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [
@@ -480,6 +480,7 @@ class _GameScreenState extends State<GameScreen>
                   color: Color(0xFFFFEFA6),
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
+                  height: 1.3,
                   shadows: [
                     Shadow(
                       color: Colors.black,
