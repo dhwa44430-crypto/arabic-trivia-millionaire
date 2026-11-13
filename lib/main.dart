@@ -38,7 +38,7 @@ class MillionaireApp extends StatelessWidget {
 }
 
 // ---------------------------------------------------------
-// نظام محتوى الاستوديو المطور (أقوال، معلومات، حكم، تشجيع جمهور)
+// نظام محتوى الاستوديو المطور (أقوال، معلومات، حكم، تشجيع جمهور) بدون تكرار
 // ---------------------------------------------------------
 class StudioContentManager {
   static final math.Random _random = math.Random();
@@ -71,7 +71,7 @@ class StudioContentManager {
 
   static final List<String> _wisdoms = [
     '«من يلاحق عصفورين يفقدهما معاً، ركز على خيار واحد.»',
-    '«رحلة الألف ميل تبدأ بخطوة، وكل سؤال خطوة نحو القمة.»',
+    '«رحلة الألف ميل تبدأ بخطوة، وكل سؤال سؤال خطوة نحو القمة.»',
     '«التجربة في معرفة الخطأ هي أول طريق الصواب.»',
     '«الناجحون لا ينجحون بالصدفة بل بالتخطيط والثقة.»',
     '«من زرع حصد، ومن فكر وصل إلى مبتغاه.»',
@@ -95,17 +95,30 @@ class StudioContentManager {
     'خطوات واثقة وثابتة نحو المجد!',
   ];
 
-  // دمج كل القوائم واختيار عبارة فريدة ومتجددة
+  // قوائم مؤقتة للاستهلاك لمنع التكرار حتى نفاد العناصر ثم إعادة تعبئتها تلقائياً
+  static List<String> _shuffledMasterList = [];
+
+  // تهيئة وتعبئة القائمة وخلطها عشوائياً بدون تكرار
+  static void _initMasterList() {
+    if (_shuffledMasterList.isEmpty) {
+      List<String> combined = [
+        ..._famousQuotes,
+        ..._generalInfo,
+        ..._wisdoms,
+        ..._audienceCheers,
+      ];
+      combined.shuffle(_random);
+      _shuffledMasterList = combined;
+    }
+  }
+
+  // جلب عبارة عشوائية فريدة تماماً تضمن عدم التكرار حتى تنفد المجموعة
   static String getRandomMessage() {
-    final List<List<String>> allCategories = [
-      _famousQuotes,
-      _generalInfo,
-      _wisdoms,
-      _audienceCheers,
-    ];
-    
-    final selectedCategory = allCategories[_random.nextInt(allCategories.length)];
-    return selectedCategory[_random.nextInt(selectedCategory.length)];
+    _initMasterList();
+    if (_shuffledMasterList.isEmpty) {
+      _initMasterList();
+    }
+    return _shuffledMasterList.removeAt(0);
   }
 }
 
