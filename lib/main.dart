@@ -610,59 +610,65 @@ class _GameScreenState extends State<GameScreen>
     return Center(
       child: SizedBox(
         width: double.infinity,
-        child: ClipPath(
-          clipper: QuestionShapeClipper(),
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 4,
-            ),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF142B4D),
-                  Color(0xFF061329),
-                  Color(0xFF142B4D),
-                ],
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.amber.withOpacity(0.25),
+                blurRadius: 10,
+                spreadRadius: 1,
               ),
-              border: Border.all(
-                color: const Color(0xFFFFD77B),
-                width: 1.4,
+            ],
+          ),
+          child: ClipPath(
+            clipper: QuestionShapeClipper(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 4,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.amber.withOpacity(0.2),
-                  blurRadius: 8,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF142B4D),
+                    Color(0xFF061329),
+                    Color(0xFF142B4D),
+                  ],
                 ),
-              ],
-            ),
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'جائزة السؤال الحالي: ',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
+                border: Border.all(
+                  color: const Color(0xFFFFD77B),
+                  width: 1.8,
+                ),
+              ),
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'جائزة السؤال الحالي: ',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  Text(
-                    '\$${formatMoney(prize)}',
-                    style: const TextStyle(
-                      color: Color(0xFFFFD77B),
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black,
-                          blurRadius: 4,
-                        ),
-                      ],
+                    Text(
+                      '\$${formatMoney(prize)}',
+                      style: const TextStyle(
+                        color: Color(0xFFFFD77B),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black,
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -722,49 +728,55 @@ class _GameScreenState extends State<GameScreen>
     return Center(
       child: SizedBox(
         width: double.infinity,
-        child: ClipPath(
-          clipper: QuestionShapeClipper(),
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 8,
-            ),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF142B4D),
-                  Color(0xFF061329),
-                  Color(0xFF142B4D),
-                ],
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.amber.withOpacity(0.25),
+                blurRadius: 10,
+                spreadRadius: 1,
               ),
-              border: Border.all(
-                color: const Color(0xFFFFD77B),
-                width: 1.4,
+            ],
+          ),
+          child: ClipPath(
+            clipper: QuestionShapeClipper(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 8,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.amber.withOpacity(0.2),
-                  blurRadius: 8,
-                ),
-              ],
-            ),
-            child: Center(
-              child: Text(
-                question,
-                textAlign: TextAlign.center,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  height: 1.25,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black,
-                      blurRadius: 4,
-                    ),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF142B4D),
+                    Color(0xFF061329),
+                    Color(0xFF142B4D),
                   ],
+                ),
+                border: Border.all(
+                  color: const Color(0xFFFFD77B),
+                  width: 1.8,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  question,
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    height: 1.25,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black,
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -856,56 +868,62 @@ class _GameScreenState extends State<GameScreen>
 
     return InkWell(
       onTap: () => answerQuestion(index),
-      child: ClipPath(
-        clipper: AnswerShapeClipper(),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [
-                Color(0xFF19365D),
-                Color(0xFF07162F),
-                Color(0xFF19365D),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.amber.withOpacity(0.2),
+              blurRadius: 6,
+              spreadRadius: 0.5,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: ClipPath(
+          clipper: AnswerShapeClipper(),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFF19365D),
+                  Color(0xFF07162F),
+                  Color(0xFF19365D),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+              border: Border.all(
+                color: const Color(0xFFFFD27A),
+                width: 1.6,
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  labels[index],
+                  style: const TextStyle(
+                    color: Color(0xFFFFD77B),
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  answer,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
             ),
-            border: Border.all(
-              color: const Color(0xFFFFD27A),
-              width: 1.1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 4,
-                offset: const Offset(0, 1),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                labels[index],
-                style: const TextStyle(
-                  color: Color(0xFFFFD77B),
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                answer,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
           ),
         ),
       ),
@@ -1077,65 +1095,51 @@ class QuestionShapeClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final path = Path();
+    final double w = size.width;
+    final double h = size.height;
 
-    path.moveTo(size.width * 0.09, 0);
-    path.lineTo(size.width * 0.91, 0);
-    path.quadraticBezierTo(
-      size.width * 0.96,
-      0,
-      size.width * 0.98,
-      size.height * 0.25,
-    );
-    path.lineTo(size.width, size.height * 0.5);
-    path.lineTo(size.width * 0.98, size.height * 0.75);
-    path.quadraticBezierTo(
-      size.width * 0.96,
-      size.height,
-      size.width * 0.91,
-      size.height,
-    );
-    path.lineTo(size.width * 0.09, size.height);
-    path.quadraticBezierTo(
-      size.width * 0.04,
-      size.height,
-      size.width * 0.02,
-      size.height * 0.75,
-    );
-    path.lineTo(0, size.height * 0.5);
-    path.lineTo(size.width * 0.02, size.height * 0.25);
-    path.quadraticBezierTo(
-      size.width * 0.04,
-      0,
-      size.width * 0.09,
-      0,
-    );
+    // رسم مسار متماثل ومغلق بالكامل (أعلى، أسفل، يمين، يسار)
+    path.moveTo(w * 0.08, 0);
+    path.lineTo(w * 0.92, 0);
+    path.quadraticBezierTo(w * 0.96, 0, w * 0.98, h * 0.25);
+    path.lineTo(w, h * 0.5);
+    path.lineTo(w * 0.98, h * 0.75);
+    path.quadraticBezierTo(w * 0.96, h, w * 0.92, h);
+    path.lineTo(w * 0.08, h);
+    path.quadraticBezierTo(w * 0.04, h, w * 0.02, h * 0.75);
+    path.lineTo(0, h * 0.5);
+    path.lineTo(w * 0.02, h * 0.25);
+    path.quadraticBezierTo(w * 0.04, 0, w * 0.08, 0);
 
     path.close();
     return path;
   }
 
   @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+  bool shouldReclip(CustomClipper<Path> oldClipper) => true;
 }
 
 class AnswerShapeClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final path = Path();
+    final double w = size.width;
+    final double h = size.height;
 
-    path.moveTo(size.width * 0.06, 0);
-    path.lineTo(size.width * 0.94, 0);
-    path.lineTo(size.width, size.height * 0.5);
-    path.lineTo(size.width * 0.94, size.height);
-    path.lineTo(size.width * 0.06, size.height);
-    path.lineTo(0, size.height * 0.5);
+    // رسم مسار مسنن الأطراف ومغلق بالكامل من الجهات الأربع (أعلى، أسفل، يمين، يسار)
+    path.moveTo(w * 0.06, 0);
+    path.lineTo(w * 0.94, 0);
+    path.lineTo(w, h * 0.5);
+    path.lineTo(w * 0.94, h);
+    path.lineTo(w * 0.06, h);
+    path.lineTo(0, h * 0.5);
+
     path.close();
-
     return path;
   }
 
   @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+  bool shouldReclip(CustomClipper<Path> oldClipper) => true;
 }
 
 class StudioBackgroundPainter extends CustomPainter {
