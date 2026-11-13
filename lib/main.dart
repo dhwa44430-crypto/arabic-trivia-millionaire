@@ -249,7 +249,7 @@ class _GameScreenState extends State<GameScreen>
 
                         const SizedBox(height: 10),
 
-                        // محتوى الشاشة مرتب: صندوق السؤال، تحته الجائزة، أزرار المساعدة المكبرة، ثم الأجوبة المرفوعة للاعلى
+                        // محتوى الشاشة مرتب: صندوق السؤال، تحته الجائزة، المساعدات، الأجوبة، وشريط تقدم النقاط بالأسفل لملء الفراغ
                         Expanded(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -274,7 +274,7 @@ class _GameScreenState extends State<GameScreen>
                                 child: _buildCurrentPrizeBox(currentQ.prizeMoney),
                               ),
                               const SizedBox(height: 12),
-                              // أزرار المساعدة (مكبرة قليلاً وفي مكانها)
+                              // أزرار المساعدة
                               SizedBox(
                                 height: 46,
                                 child: Center(
@@ -282,7 +282,7 @@ class _GameScreenState extends State<GameScreen>
                                 ),
                               ),
                               const SizedBox(height: 14),
-                              // اختيارات الإجابة (مرفوعة للأعلى)
+                              // اختيارات الإجابة
                               SizedBox(
                                 height: 165,
                                 child: GridView.builder(
@@ -305,6 +305,12 @@ class _GameScreenState extends State<GameScreen>
                                   },
                                 ),
                               ),
+                              const SizedBox(height: 15),
+                              // شريط تقدم نقاط اللعبة الاحترافي لملء الفراغ السفلي
+                              SizedBox(
+                                height: 35,
+                                child: _buildGameProgressBar(),
+                              ),
                             ],
                           ),
                         ),
@@ -313,6 +319,71 @@ class _GameScreenState extends State<GameScreen>
                   ),
           ),
         ],
+      ),
+    );
+  }
+
+  // شريط تقدم نقاط اللعبة الأفقي بالأسفل
+  Widget _buildGameProgressBar() {
+    int totalStages = math.min(15, arabicTriviaQuestions.length);
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: const Color(0xFF071326).withOpacity(0.8),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.amber.withOpacity(0.3), width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.4),
+              blurRadius: 6,
+            ),
+          ],
+        ),
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: totalStages,
+          itemBuilder: (context, index) {
+            bool isPassed = index < currentQuestionIndex;
+            bool isCurrent = index == currentQuestionIndex;
+
+            return Container(
+              width: totalStages > 10 ? 18 : 22,
+              margin: const EdgeInsets.symmetric(horizontal: 2),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isCurrent
+                    ? Colors.amber
+                    : (isPassed ? Colors.amber[700] : const Color(0xFF132B4D)),
+                border: Border.all(
+                  color: isCurrent ? Colors.white : Colors.amber.withOpacity(0.5),
+                  width: isCurrent ? 1.5 : 1,
+                ),
+                boxShadow: isCurrent
+                    ? [
+                        BoxShadow(
+                          color: Colors.amber.withOpacity(0.8),
+                          blurRadius: 6,
+                          spreadRadius: 1,
+                        ),
+                      ]
+                    : [],
+              ),
+              child: Center(
+                child: Text(
+                  '${index + 1}',
+                  style: TextStyle(
+                    color: isCurrent ? Colors.black : Colors.white70,
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
