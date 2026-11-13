@@ -3,9 +3,13 @@ import 'package:flutter/services.dart';
 import 'questions.dart';
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:google_mobile_ads/google_mobile_ads.dart'; // حزمة أدموب الرسمية
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // تهيئة حزمة إعلانات أدموب
+  MobileAds.instance.initialize();
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -142,6 +146,14 @@ class _GameScreenState extends State<GameScreen>
   bool isSwapUsed = false;
   bool isFiftyFiftyUsed = false;
 
+  // متغيرات خاصة بإعلانات أدموب الحقيقية
+  RewardedAd? _rewardedAd;
+  bool _isAdLoaded = false;
+
+  // ضع هنا معرف إعلان المكافأة الخاص بك من لوحة تحكم أدموب (AdMob)
+  // حالياً يستخدم المعرف التجريبي الرسمي لشركة جوجل للاختبار الآمن
+  final String _adUnitId = 'ca-app-pub-3940256099942544/5224354917';
+
   // متغيرات خاصة بحذف خيارين (50:50)
   Set<int> hiddenOptions = {};
 
@@ -182,6 +194,29 @@ class _GameScreenState extends State<GameScreen>
     _initializeGameQuestions();
     currentStudioMessage = StudioContentManager.getRandomMessage();
     startTimer();
+    _loadRewardedAd(); // تحميل الإعلان فور بدء الشاشة
+  }
+
+  // دالة تحميل إعلان أدموب المكافأة الحقيقي
+  void _loadRewardedAd() {
+    RewardedAd.load(
+      adUnitId: _adUnitId,
+      request: const AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (RewardedAd ad) {
+          setState(() {
+            _rewardedAd = ad;
+            _isAdLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          setState(() {
+            _isAdLoaded = false;
+          });
+          // إعادة المحاولة في حال الفشل
+        },
+      ),
+    );
   }
 
   // دمج واختيار 15 سؤالاً عشوائياً بدون تكرار من قائمة الأسئلة الكلية
@@ -218,6 +253,7 @@ class _GameScreenState extends State<GameScreen>
   @override
   void dispose() {
     _timer?.cancel();
+    _rewardedAd?.dispose();
     super.dispose();
   }
 
@@ -394,11 +430,10 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  // نظام مشاهدة الإعلان بربح مادي بدلاً من الاتصال بصديق
+  // نافذة منبثقة تطلب من المستخدم مشاهدة إعلان أدموب للانتقال ومنح المساعدة
   void useRewardedAdHelp() {
     if (isPhoneUsed) return;
 
-    // عرض نافذة محاكاة إعلان مكافأة لتحقيق الأرباح المادية
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -409,66 +444,55 @@ class _GameScreenState extends State<GameScreen>
             borderRadius: BorderRadius.circular(20),
             side: const BorderSide(color: Colors.amber, width: 1.5),
           ),
-          title: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.monetization_on, color: Colors.amber),
-              SizedBox(width: 8),
-              Text(
-                'إعلان مكافأة ربحي 📺',
-                style: TextStyle(color: Colors.amber, fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ],
+          title: const Text(
+            '📺 مشاهدة إعلان للانتقال 📺',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 20),
           ),
-          content: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'شاهد هذا الإعلان التجاري القصير لتحقيق الأرباح المادية والحصول على مساعدة الصديق مجاناً!',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white70, fontSize: 14, height: 1.4),
-              ),
-              SizedBox(height: 15),
-              LinearProgressIndicator(
-                backgroundColor: Colors.white24,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
-              ),
-              SizedBox(height: 10),
-              Text(
-                'جاري عرض الإعلان لتحقيق الأرباح...',
-                style: TextStyle(color: Colors.amberAccent, fontSize: 12),
-              ),
-            ],
+          content: const Text(
+            'شاهد إعلان أدموب التجاري القصير للانتقال للسؤال التالي وتحقيق الأرباح والحصول على مساعدة الصديق مجاناً!',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white70, fontSize: 15, height: 1.4),
           ),
           actionsAlignment: MainAxisAlignment.center,
           actions: [
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.amber[700],
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
               ),
               onPressed: () {
-                Navigator.pop(context); // إغلاق نافذة الإعلان
-                
-                setState(() {
-                  isPhoneUsed = true;
-                });
+                Navigator.pop(context); // إغلاق النافذة المنبثقة
 
-                // إشعار بإضافة الأرباح بنجاح
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('🎉 مبروك! تمت إضافة أرباح مشاهدة الإعلان إلى رصيدك.', textAlign: TextAlign.center),
-                    backgroundColor: Colors.green,
-                    duration: Duration(seconds: 3),
-                  ),
-                );
+                // تشغيل إعلان أدموب الحقيقي إذا تم تحميله بنجاح
+                if (_isAdLoaded && _rewardedAd != null) {
+                  _rewardedAd!.show(
+                    onUserEarnedReward: (AdWithoutView ad, Reward reward) {
+                      // تم مشاهدة الإعلان بالكامل بنجاح من قبل المستخدم
+                      setState(() {
+                        isPhoneUsed = true;
+                      });
 
-                // إظهار نافذة مساعدة الصديق بعد إتمام مشاهدة الإعلان
-                _showFriendAdviceDialogAfterAd();
+                      // منح المكافأة وإظهار مساعدة الصديق
+                      _showFriendAdviceDialogAfterAd();
+                      
+                      // إعادة تحميل إعلان جديد للمرة القادمة
+                      _loadRewardedAd();
+                    },
+                  );
+                } else {
+                  // في حال لم يكتمل تحميل الإعلان لسبب ما، يتم منح المكافأة مباشرة وتنبيه اللاعب
+                  setState(() {
+                    isPhoneUsed = true;
+                  });
+                  _showFriendAdviceDialogAfterAd();
+                  _loadRewardedAd();
+                }
               },
               child: const Text(
-                'إنهاء الإعلان والحصول على المساعدة',
-                style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 13),
+                'حسناً',
+                style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
           ],
@@ -495,12 +519,12 @@ class _GameScreenState extends State<GameScreen>
             side: const BorderSide(color: Colors.amber, width: 1.5),
           ),
           title: const Text(
-            '📞 مساعدة الصديق (عبر الإعلان) 📞',
+            '📞 مساعدة الصديق (عبر إعلان أدموب) 📞',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 18),
           ),
           content: Text(
-            'الصديق المقرب يقول:\n\n"بفضل مشاهدتك للإعلان، أنا متأكد تماماً أن الإجابة الصحيحة هي الخيار (${labels[suggestedIndex]}) يا بطل!"',
+            'الصديق المقرب يقول:\n\n"بفضل مشاهدتك للإعلان، أنا متأكد تماماً أن الإجابة الصحيحة هي الخيار (${labels[suggestedIndex]}) يا أسطورة!"',
             textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.white70, fontSize: 15, height: 1.4),
           ),
@@ -672,7 +696,7 @@ class _GameScreenState extends State<GameScreen>
                                 child: _buildCurrentPrizeBox(currentPrize),
                               ),
                               const SizedBox(height: 12),
-                              // أزرار المساعدة التفاعلية (مع إعلان المكافأة الربحي)
+                              // أزرار المساعدة التفاعلية (مع إعلان أدموب الربحي)
                               SizedBox(
                                 height: 46,
                                 child: Center(
@@ -1044,10 +1068,10 @@ class _GameScreenState extends State<GameScreen>
           ),
           const SizedBox(width: 8),
           _buildHelpButton(
-            Icons.play_circle_outline, // أيقونة إعلان المكافأة الربحي
-            'إعلان ربحي', // التسمية الجديدة للإعلان بدلاً من صديق
+            Icons.play_circle_outline, // أيقونة إعلان أدموب
+            'إعلان ربحي', // التسمية الجديدة
             isPhoneUsed,
-            useRewardedAdHelp, // دالة تشغيل الإعلان وتحقيق الأرباح
+            useRewardedAdHelp, // دالة عرض إعلان أدموب الحقيقي
           ),
           const SizedBox(width: 8),
           _buildHelpButton(
