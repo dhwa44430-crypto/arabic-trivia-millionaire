@@ -208,7 +208,7 @@ class _GameScreenState extends State<GameScreen>
     InterstitialAd.load(
       adUnitId: _interstitialAdUnitId,
       request: const AdRequest(),
-      interstitialAdLoadCallback: InterstitialAdLoadCallback(
+      adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (InterstitialAd ad) {
           _interstitialAd = ad;
           _isInterstitialLoaded = true;
