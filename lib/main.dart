@@ -249,14 +249,15 @@ class _GameScreenState extends State<GameScreen>
 
                         const SizedBox(height: 10),
 
-                        // محتوى الشاشة مرتب: صندوق السؤال أولاً، ثم تحته صندوق الجائزة الحالية بحجم مدمج
+                        // محتوى الشاشة مرتب: صندوق السؤال، تحته الجائزة، أزرار المساعدة المكبرة، ثم الأجوبة المرفوعة للاعلى
                         Expanded(
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
+                              const SizedBox(height: 4),
                               // صندوق السؤال
                               SizedBox(
-                                height: 110,
+                                height: 105,
                                 child: AnimatedSwitcher(
                                   duration: const Duration(
                                     milliseconds: 300,
@@ -266,21 +267,22 @@ class _GameScreenState extends State<GameScreen>
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 6),
-                              // صندوق الجائزة الحالية (أصبح تحت السؤال وبحجم مدمج للمنتصف)
+                              const SizedBox(height: 8),
+                              // صندوق الجائزة الحالية
                               SizedBox(
-                                height: 55,
+                                height: 50,
                                 child: _buildCurrentPrizeBox(currentQ.prizeMoney),
                               ),
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 12),
+                              // أزرار المساعدة (مكبرة قليلاً وفي مكانها)
                               SizedBox(
-                                height: 38,
+                                height: 46,
                                 child: Center(
                                   child: _buildHelpButtons(),
                                 ),
                               ),
-                              const SizedBox(height: 6),
-                              // اختيارات الإجابة
+                              const SizedBox(height: 14),
+                              // اختيارات الإجابة (مرفوعة للأعلى)
                               SizedBox(
                                 height: 165,
                                 child: GridView.builder(
@@ -517,8 +519,8 @@ class _GameScreenState extends State<GameScreen>
   Widget _buildHelpButton(IconData icon, String label) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 4,
+        horizontal: 12,
+        vertical: 6,
       ),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -527,15 +529,15 @@ class _GameScreenState extends State<GameScreen>
             Color(0xFF06152C),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: const Color(0xFF55CFFF),
-          width: 1,
+          width: 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.lightBlueAccent.withOpacity(0.15),
-            blurRadius: 5,
+            color: Colors.lightBlueAccent.withOpacity(0.2),
+            blurRadius: 6,
           ),
         ],
       ),
@@ -544,14 +546,14 @@ class _GameScreenState extends State<GameScreen>
         children: [
           Icon(
             icon,
-            size: 14,
+            size: 16,
             color: const Color(0xFFFFE6A1),
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 5),
           Text(
             label,
             style: const TextStyle(
-              fontSize: 11,
+              fontSize: 12,
               color: Colors.white,
               fontWeight: FontWeight.bold,
             ),
