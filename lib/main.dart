@@ -150,9 +150,14 @@ class _GameScreenState extends State<GameScreen>
   RewardedAd? _rewardedAd;
   bool _isAdLoaded = false;
 
-  // ضع هنا معرف إعلان المكافأة الخاص بك من لوحة تحكم أدموب (AdMob)
-  // حالياً يستخدم المعرف التجريبي الرسمي لشركة جوجل للاختبار الآمن
-  final String _adUnitId = 'ca-app-pub-3940256099942544/5224354917';
+  // متغيرات خاصة بالإعلان البيني (Interstitial Ad) عند فتح التطبيق
+  InterstitialAd? _interstitialAd;
+  bool _isInterstitialLoaded = false;
+  Timer? _startupAdTimer;
+
+  // معرفات الإعلانات التجريبية الوهمية للاختبار الآمن
+  final String _adUnitId = 'ca-app-pub-3940256099942544/5224354917'; // إعلان مكافأة تجريبي
+  final String _interstitialAdUnitId = 'ca-app-pub-3940256099942544/1033173712'; // إعلان بيني تجريبي
 
   // متغيرات خاصة بحذف خيارين (50:50)
   Set<int> hiddenOptions = {};
@@ -194,7 +199,54 @@ class _GameScreenState extends State<GameScreen>
     _initializeGameQuestions();
     currentStudioMessage = StudioContentManager.getRandomMessage();
     startTimer();
-    _loadRewardedAd(); // تحميل الإعلان فور بدء الشاشة
+    _loadRewardedAd(); // تحميل إعلان المكافأة فور بدء الشاشة
+    _loadAndScheduleStartupInterstitialAd(); // تحميل جدولة الإعلان البيني بعد 15 ثانية من فتح التطبيق
+  }
+
+  // دالة تحميل وإظهار الإعلان البيني بعد 15 ثانية من فتح التطبيق
+  void _loadAndScheduleStartupInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: _interstitialAdUnitId,
+      request: const AdRequest(),
+      interstitialAdLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (InterstitialAd ad) {
+          _interstitialAd = ad;
+          _isInterstitialLoaded = true;
+
+          // ضبط مؤقت لمدة 15 ثانية من فتح التطبيق لعرض الإعلان البيني
+          _startupAdTimer = Timer(const Duration(seconds: 15), () {
+            _showStartupInterstitialAd();
+          });
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          _isInterstitialLoaded = false;
+          _interstitialAd = null;
+        },
+      ),
+    );
+  }
+
+  // دالة عرض الإعلان البيني الخاص بفتح التطبيق
+  void _showStartupInterstitialAd() {
+    if (_isInterstitialLoaded && _interstitialAd != null) {
+      // إيقاف مؤقت السؤال مؤقتاً أثناء عرض الإعلان البيني لراحة المستخدم
+      _timer?.cancel();
+
+      _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (InterstitialAd ad) {
+          ad.dispose();
+          startTimer(); // استئناف العداد بعد إغلاق الإعلان
+        },
+        onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+          ad.dispose();
+          startTimer(); // استئناف العداد في حال فشل العرض
+        },
+      );
+
+      _interstitialAd!.show();
+      _interstitialAd = null;
+      _isInterstitialLoaded = false;
+    }
   }
 
   // دالة تحميل إعلان أدموب المكافأة الحقيقي
@@ -254,7 +306,9 @@ class _GameScreenState extends State<GameScreen>
   @override
   void dispose() {
     _timer?.cancel();
+    _startupAdTimer?.cancel();
     _rewardedAd?.dispose();
+    _interstitialAd?.dispose();
     super.dispose();
   }
 
@@ -520,7 +574,7 @@ class _GameScreenState extends State<GameScreen>
                 if (Navigator.canPop(dialogContext)) {
                   Navigator.pop(dialogContext); // إغلاق نافذة البحث بعد انتهاء الـ 10 ثوانٍ
                 }
-                // إذا انتهت ال10 ثوانٍ ولم يوجد إعلان: إظهار رسالة التنبيه وعدم تغيير السؤال وعدم استهلاك الزر
+                // إذا انتهت ال10 ثوانٍ ولم يوجد إعلان: إغلاق وإظهار رسالة التنبيه وعدم تغيير السؤال وعدم استهلاك الزر
                 _handleNoAdAvailable();
               }
             });
