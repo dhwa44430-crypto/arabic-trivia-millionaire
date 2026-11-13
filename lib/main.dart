@@ -385,7 +385,7 @@ class _GameScreenState extends State<GameScreen>
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               const SizedBox(height: 4),
-                              // صندوق السؤال مغلف بحدود ذهبية من الأربع جهات
+                              // صندوق السؤال بتصميمه الأصلي مع إطار ذهبي كامل من الجهات الأربع
                               SizedBox(
                                 height: 105,
                                 child: AnimatedSwitcher(
@@ -398,7 +398,7 @@ class _GameScreenState extends State<GameScreen>
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              // صندوق الجائزة الحالية مغلف بحدود ذهبية من الأربع جهات
+                              // صندوق الجائزة الحالية بتصميمه الأصلي مع إطار ذهبي كامل من الجهات الأربع
                               SizedBox(
                                 height: 50,
                                 child: _buildCurrentPrizeBox(currentPrize),
@@ -412,7 +412,7 @@ class _GameScreenState extends State<GameScreen>
                                 ),
                               ),
                               const SizedBox(height: 14),
-                              // اختيارات الإجابة مغلفة بحدود ذهبية من الأربع جهات
+                              // اختيارات الإجابة بتصميمه الأصلي مع إطار ذهبي كامل من الجهات الأربع
                               SizedBox(
                                 height: 165,
                                 child: GridView.builder(
@@ -606,63 +606,58 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  // صندوق الجائزة الحالية مغلف بحدود ذهبية واضحة ومتكاملة من الأربع جهات
+  // صندوق الجائزة الحالية مع الحفاظ على الشكل الأصلي وإطار ذهبي يحيط به بالكامل
   Widget _buildCurrentPrizeBox(int prize) {
     return Center(
       child: SizedBox(
         width: double.infinity,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 4,
-          ),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [
-                Color(0xFF142B4D),
-                Color(0xFF061329),
-                Color(0xFF142B4D),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: const Color(0xFFFFD77B),
-              width: 1.8,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.amber.withOpacity(0.2),
-                blurRadius: 8,
+        child: CustomPaint(
+          painter: QuestionBorderPainter(),
+          child: ClipPath(
+            clipper: QuestionShapeClipper(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 4,
               ),
-            ],
-          ),
-          child: Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'جائزة السؤال الحالي: ',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                  ),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFF142B4D),
+                    Color(0xFF061329),
+                    Color(0xFF142B4D),
+                  ],
                 ),
-                Text(
-                  '\$${formatMoney(prize)}',
-                  style: const TextStyle(
-                    color: Color(0xFFFFD77B),
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black,
-                        blurRadius: 4,
+              ),
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'جائزة السؤال الحالي: ',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ),
+                    ),
+                    Text(
+                      '\$${formatMoney(prize)}',
+                      style: const TextStyle(
+                        color: Color(0xFFFFD77B),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black,
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -717,53 +712,48 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  // صندوق السؤال مغلف بحدود ذهبية واضحة ومتكاملة من الأربع جهات
+  // صندوق السؤال مع الحفاظ على الشكل الأصلي وإطار ذهبي يحيط به بالكامل
   Widget _buildQuestion(String question) {
     return Center(
       child: SizedBox(
         width: double.infinity,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 8,
-          ),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [
-                Color(0xFF142B4D),
-                Color(0xFF061329),
-                Color(0xFF142B4D),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: const Color(0xFFFFD77B),
-              width: 1.8,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.amber.withOpacity(0.2),
-                blurRadius: 8,
+        child: CustomPaint(
+          painter: QuestionBorderPainter(),
+          child: ClipPath(
+            clipper: QuestionShapeClipper(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 8,
               ),
-            ],
-          ),
-          child: Center(
-            child: Text(
-              question,
-              textAlign: TextAlign.center,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                height: 1.25,
-                shadows: [
-                  Shadow(
-                    color: Colors.black,
-                    blurRadius: 4,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFF142B4D),
+                    Color(0xFF061329),
+                    Color(0xFF142B4D),
+                  ],
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  question,
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    height: 1.25,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black,
+                        blurRadius: 4,
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -849,61 +839,55 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  // أزرار الإجابات مغلفة بحدود ذهبية واضحة ومتكاملة من الأربع جهات
+  // أزرار الإجابات مع الحفاظ على الشكل الأصلي وإطار ذهبي يحيط به بالكامل من الأربع جهات
   Widget _buildAnswerButton(int index, String answer) {
     const labels = ['A.', 'B.', 'C.', 'D.'];
 
     return InkWell(
       onTap: () => answerQuestion(index),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [
-              Color(0xFF19365D),
-              Color(0xFF07162F),
-              Color(0xFF19365D),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: const Color(0xFFFFD27A),
-            width: 1.6,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 4,
-              offset: const Offset(0, 1),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              labels[index],
-              style: const TextStyle(
-                color: Color(0xFFFFD77B),
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
+      child: CustomPaint(
+        painter: AnswerBorderPainter(),
+        child: ClipPath(
+          clipper: AnswerShapeClipper(),
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF19365D),
+                  Color(0xFF07162F),
+                  Color(0xFF19365D),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
             ),
-            const SizedBox(height: 2),
-            Text(
-              answer,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-              ),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  labels[index],
+                  style: const TextStyle(
+                    color: Color(0xFFFFD77B),
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  answer,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -1074,32 +1058,108 @@ class QuestionShapeClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final path = Path();
-    final double w = size.width;
-    final double h = size.height;
 
-    path.moveTo(w * 0.08, 0);
-    path.lineTo(w * 0.92, 0);
-    path.quadraticBezierTo(w * 0.96, 0, w * 0.98, h * 0.25);
-    path.lineTo(w, h * 0.5);
-    path.lineTo(w * 0.98, h * 0.75);
-    path.quadraticBezierTo(w * 0.96, h, w * 0.92, h);
-    path.lineTo(w * 0.08, h);
-    path.quadraticBezierTo(w * 0.04, h, w * 0.02, h * 0.75);
-    path.lineTo(0, h * 0.5);
-    path.lineTo(w * 0.02, h * 0.25);
-    path.quadraticBezierTo(w * 0.04, 0, w * 0.08, 0);
+    path.moveTo(size.width * 0.09, 0);
+    path.lineTo(size.width * 0.91, 0);
+    path.quadraticBezierTo(
+      size.width * 0.96,
+      0,
+      size.width * 0.98,
+      size.height * 0.25,
+    );
+    path.lineTo(size.width, size.height * 0.5);
+    path.lineTo(size.width * 0.98, size.height * 0.75);
+    path.quadraticBezierTo(
+      size.width * 0.96,
+      size.height,
+      size.width * 0.91,
+      size.height,
+    );
+    path.lineTo(size.width * 0.09, size.height);
+    path.quadraticBezierTo(
+      size.width * 0.04,
+      size.height,
+      size.width * 0.02,
+      size.height * 0.75,
+    );
+    path.lineTo(0, size.height * 0.5);
+    path.lineTo(size.width * 0.02, size.height * 0.25);
+    path.quadraticBezierTo(
+      size.width * 0.04,
+      0,
+      size.width * 0.09,
+      0,
+    );
 
     path.close();
     return path;
   }
 
   @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => true;
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
 
 class AnswerShapeClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
+    final path = Path();
+
+    path.moveTo(size.width * 0.06, 0);
+    path.lineTo(size.width * 0.94, 0);
+    path.lineTo(size.width, size.height * 0.5);
+    path.lineTo(size.width * 0.94, size.height);
+    path.lineTo(size.width * 0.06, size.height);
+    path.lineTo(0, size.height * 0.5);
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+// كلاسات رسم الحدود الذهبية المتكاملة حول الأشكال الأصلية تماماً من جميع الجهات
+class QuestionBorderPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFFFFD77B)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6;
+
+    final path = Path();
+    final double w = size.width;
+    final double h = size.height;
+
+    path.moveTo(w * 0.09, 0);
+    path.lineTo(w * 0.91, 0);
+    path.quadraticBezierTo(w * 0.96, 0, w * 0.98, h * 0.25);
+    path.lineTo(w, h * 0.5);
+    path.lineTo(w * 0.98, h * 0.75);
+    path.quadraticBezierTo(w * 0.96, h, w * 0.91, h);
+    path.lineTo(w * 0.09, h);
+    path.quadraticBezierTo(w * 0.04, h, w * 0.02, h * 0.75);
+    path.lineTo(0, h * 0.5);
+    path.lineTo(w * 0.02, h * 0.25);
+    path.quadraticBezierTo(w * 0.04, 0, w * 0.09, 0);
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+class AnswerBorderPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFFFFD27A)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6;
+
     final path = Path();
     final double w = size.width;
     final double h = size.height;
@@ -1110,13 +1170,13 @@ class AnswerShapeClipper extends CustomClipper<Path> {
     path.lineTo(w * 0.94, h);
     path.lineTo(w * 0.06, h);
     path.lineTo(0, h * 0.5);
-
     path.close();
-    return path;
+
+    canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => true;
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
 class StudioBackgroundPainter extends CustomPainter {
