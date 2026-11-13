@@ -138,7 +138,7 @@ class _GameScreenState extends State<GameScreen>
 
   // متغيرات تتبع وسائل المساعدة (لكي تستخدم مرة واحدة فقط)
   bool isAudienceUsed = false;
-  bool isPhoneUsed = false;
+  bool isPhoneUsed = false; // تتبع استخدام إعلان المكافأة الربحي
   bool isSwapUsed = false;
   bool isFiftyFiftyUsed = false;
 
@@ -394,18 +394,95 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  void usePhoneHelp() {
+  // نظام مشاهدة الإعلان بربح مادي بدلاً من الاتصال بصديق
+  void useRewardedAdHelp() {
     if (isPhoneUsed) return;
-    setState(() {
-      isPhoneUsed = true;
-    });
 
+    // عرض نافذة محاكاة إعلان مكافأة لتحقيق الأرباح المادية
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF0F172A),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: Colors.amber, width: 1.5),
+          ),
+          title: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.monetization_on, color: Colors.amber),
+              SizedBox(width: 8),
+              Text(
+                'إعلان مكافأة ربحي 📺',
+                style: TextStyle(color: Colors.amber, fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'شاهد هذا الإعلان التجاري القصير لتحقيق الأرباح المادية والحصول على مساعدة الصديق مجاناً!',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white70, fontSize: 14, height: 1.4),
+              ),
+              SizedBox(height: 15),
+              LinearProgressIndicator(
+                backgroundColor: Colors.white24,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
+              ),
+              SizedBox(height: 10),
+              Text(
+                'جاري عرض الإعلان لتحقيق الأرباح...',
+                style: TextStyle(color: Colors.amberAccent, fontSize: 12),
+              ),
+            ],
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.amber[700],
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              onPressed: () {
+                Navigator.pop(context); // إغلاق نافذة الإعلان
+                
+                setState(() {
+                  isPhoneUsed = true;
+                });
+
+                // إشعار بإضافة الأرباح بنجاح
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('🎉 مبروك! تمت إضافة أرباح مشاهدة الإعلان إلى رصيدك.', textAlign: TextAlign.center),
+                    backgroundColor: Colors.green,
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+
+                // إظهار نافذة مساعدة الصديق بعد إتمام مشاهدة الإعلان
+                _showFriendAdviceDialogAfterAd();
+              },
+              child: const Text(
+                'إنهاء الإعلان والحصول على المساعدة',
+                style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showFriendAdviceDialogAfterAd() {
     final currentQ = sessionQuestions[currentQuestionIndex];
     final correctIndex = currentQ.correctAnswerIndex;
     const labels = ['A', 'B', 'C', 'D'];
     final random = math.Random();
 
-    // احتمال 85% أن يكون الصديق على صواب
     int suggestedIndex = (random.nextDouble() < 0.85) ? correctIndex : random.nextInt(4);
 
     showDialog(
@@ -418,12 +495,12 @@ class _GameScreenState extends State<GameScreen>
             side: const BorderSide(color: Colors.amber, width: 1.5),
           ),
           title: const Text(
-            '📞 اتصال بصديق 📞',
+            '📞 مساعدة الصديق (عبر الإعلان) 📞',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 20),
+            style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 18),
           ),
           content: Text(
-            'الصديق المقرب يقول:\n\n"أنا متأكد بنسبة كبيرة أن الإجابة الصحيحة هي الخيار (${labels[suggestedIndex]}) يا صديقي!"',
+            'الصديق المقرب يقول:\n\n"بفضل مشاهدتك للإعلان، أنا متأكد تماماً أن الإجابة الصحيحة هي الخيار (${labels[suggestedIndex]}) يا بطل!"',
             textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.white70, fontSize: 15, height: 1.4),
           ),
@@ -595,7 +672,7 @@ class _GameScreenState extends State<GameScreen>
                                 child: _buildCurrentPrizeBox(currentPrize),
                               ),
                               const SizedBox(height: 12),
-                              // أزرار المساعدة التفاعلية
+                              // أزرار المساعدة التفاعلية (مع إعلان المكافأة الربحي)
                               SizedBox(
                                 height: 46,
                                 child: Center(
@@ -967,10 +1044,10 @@ class _GameScreenState extends State<GameScreen>
           ),
           const SizedBox(width: 8),
           _buildHelpButton(
-            Icons.phone_in_talk_outlined,
-            'صديق',
+            Icons.play_circle_outline, // أيقونة إعلان المكافأة الربحي
+            'إعلان ربحي', // التسمية الجديدة للإعلان بدلاً من صديق
             isPhoneUsed,
-            usePhoneHelp,
+            useRewardedAdHelp, // دالة تشغيل الإعلان وتحقيق الأرباح
           ),
           const SizedBox(width: 8),
           _buildHelpButton(
