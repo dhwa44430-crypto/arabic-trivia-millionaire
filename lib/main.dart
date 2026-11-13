@@ -249,14 +249,20 @@ class _GameScreenState extends State<GameScreen>
 
                         const SizedBox(height: 10),
 
-                        // محتوى الشاشة بالكامل أصبح مرتباً بعرض الشاشة وبدون شجرة الجوائز المزعجة
+                        // محتوى الشاشة متناسق ومميز مع صندوق الجائزة الحالية وصندوق السؤال
                         Expanded(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              // صندوق السؤال بحجم مدمج وقريب للنص
+                              // صندوق الجائزة الحالية (بنفس تصميم صندوق السؤال)
                               SizedBox(
-                                height: 130,
+                                height: 75,
+                                child: _buildCurrentPrizeBox(currentQ.prizeMoney),
+                              ),
+                              const SizedBox(height: 8),
+                              // صندوق السؤال
+                              SizedBox(
+                                height: 125,
                                 child: AnimatedSwitcher(
                                   duration: const Duration(
                                     milliseconds: 300,
@@ -266,17 +272,17 @@ class _GameScreenState extends State<GameScreen>
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 10),
+                              const SizedBox(height: 8),
                               SizedBox(
-                                height: 40,
+                                height: 38,
                                 child: Center(
                                   child: _buildHelpButtons(),
                                 ),
                               ),
-                              const SizedBox(height: 10),
-                              // اختيارات الإجابة بحجم متناسق ومضغوط
+                              const SizedBox(height: 8),
+                              // اختيارات الإجابة
                               SizedBox(
-                                height: 180,
+                                height: 175,
                                 child: GridView.builder(
                                   physics:
                                       const NeverScrollableScrollPhysics(),
@@ -305,6 +311,72 @@ class _GameScreenState extends State<GameScreen>
                   ),
           ),
         ],
+      ),
+    );
+  }
+
+  // ودجت صندوق الجائزة الحالية بتصميم مشابه لصندوق السؤال وبخط ذهبي
+  Widget _buildCurrentPrizeBox(int prize) {
+    return Center(
+      child: SizedBox(
+        width: double.infinity,
+        child: ClipPath(
+          clipper: QuestionShapeClipper(),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 6,
+            ),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFF142B4D),
+                  Color(0xFF061329),
+                  Color(0xFF142B4D),
+                ],
+              ),
+              border: Border.all(
+                color: const Color(0xFFFFD77B),
+                width: 1.4,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.amber.withOpacity(0.2),
+                  blurRadius: 8,
+                ),
+              ],
+            ),
+            child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'جائزة السؤال الحالي: ',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    '\$${formatMoney(prize)}',
+                    style: const TextStyle(
+                      color: Color(0xFFFFD77B),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black,
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -394,7 +466,7 @@ class _GameScreenState extends State<GameScreen>
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
                   height: 1.3,
                   shadows: [
