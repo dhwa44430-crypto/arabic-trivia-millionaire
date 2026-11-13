@@ -468,7 +468,7 @@ class _GameScreenState extends State<GameScreen>
                 // تشغيل إعلان أدموب الحقيقي إذا تم تحميله بنجاح
                 if (_isAdLoaded && _rewardedAd != null) {
                   _rewardedAd!.show(
-                    onUserEarnedReward: (AdWithoutView ad, Reward reward) {
+                    onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
                       // تم مشاهدة الإعلان بالكامل بنجاح من قبل المستخدم
                       setState(() {
                         isPhoneUsed = true;
