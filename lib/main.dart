@@ -430,7 +430,7 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  // نافذة منبثقة تطلب من المستخدم مشاهدة إعلان أدموب للانتقال ومنح المساعدة
+  // نافذة منبثقة بالصيغة المطلوبة "شاهد اعلان لتغير السؤال" مع زر "حسناً"
   void useRewardedAdHelp() {
     if (isPhoneUsed) return;
 
@@ -445,14 +445,9 @@ class _GameScreenState extends State<GameScreen>
             side: const BorderSide(color: Colors.amber, width: 1.5),
           ),
           title: const Text(
-            '📺 مشاهدة إعلان للانتقال 📺',
+            'شاهد اعلان لتغير السؤال',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 20),
-          ),
-          content: const Text(
-            'شاهد إعلان أدموب التجاري القصير للانتقال للسؤال التالي وتحقيق الأرباح والحصول على مساعدة الصديق مجاناً!',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white70, fontSize: 15, height: 1.4),
           ),
           actionsAlignment: MainAxisAlignment.center,
           actions: [
@@ -472,21 +467,35 @@ class _GameScreenState extends State<GameScreen>
                       // تم مشاهدة الإعلان بالكامل بنجاح من قبل المستخدم
                       setState(() {
                         isPhoneUsed = true;
+                        hiddenOptions.clear();
+                        final random = math.Random();
+                        List<Question> pool = List.from(arabicTriviaQuestions);
+                        pool.shuffle(random);
+                        if (pool.isNotEmpty) {
+                          sessionQuestions[currentQuestionIndex] = pool.first;
+                        }
                       });
 
-                      // منح المكافأة وإظهار مساعدة الصديق
-                      _showFriendAdviceDialogAfterAd();
+                      // إظهار رسالة منبثقة "تم تغير السؤال" بعد انتهاء الإعلان
+                      _showQuestionChangedDialog();
                       
                       // إعادة تحميل إعلان جديد للمرة القادمة
                       _loadRewardedAd();
                     },
                   );
                 } else {
-                  // في حال لم يكتمل تحميل الإعلان لسبب ما، يتم منح المكافأة مباشرة وتنبيه اللاعب
+                  // في حال لم يكتمل تحميل الإعلان لسبب ما، يتم تغيير السؤال مباشرة وتنبيه اللاعب
                   setState(() {
                     isPhoneUsed = true;
+                    hiddenOptions.clear();
+                    final random = math.Random();
+                    List<Question> pool = List.from(arabicTriviaQuestions);
+                    pool.shuffle(random);
+                    if (pool.isNotEmpty) {
+                      sessionQuestions[currentQuestionIndex] = pool.first;
+                    }
                   });
-                  _showFriendAdviceDialogAfterAd();
+                  _showQuestionChangedDialog();
                   _loadRewardedAd();
                 }
               },
@@ -501,14 +510,7 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  void _showFriendAdviceDialogAfterAd() {
-    final currentQ = sessionQuestions[currentQuestionIndex];
-    final correctIndex = currentQ.correctAnswerIndex;
-    const labels = ['A', 'B', 'C', 'D'];
-    final random = math.Random();
-
-    int suggestedIndex = (random.nextDouble() < 0.85) ? correctIndex : random.nextInt(4);
-
+  void _showQuestionChangedDialog() {
     showDialog(
       context: context,
       builder: (context) {
@@ -519,21 +521,16 @@ class _GameScreenState extends State<GameScreen>
             side: const BorderSide(color: Colors.amber, width: 1.5),
           ),
           title: const Text(
-            '📞 مساعدة الصديق (عبر إعلان أدموب) 📞',
+            'تم تغير السؤال',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 18),
-          ),
-          content: Text(
-            'الصديق المقرب يقول:\n\n"بفضل مشاهدتك للإعلان، أنا متأكد تماماً أن الإجابة الصحيحة هي الخيار (${labels[suggestedIndex]}) يا أسطورة!"',
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white70, fontSize: 15, height: 1.4),
+            style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 20),
           ),
           actionsAlignment: MainAxisAlignment.center,
           actions: [
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.amber[700]),
               onPressed: () => Navigator.pop(context),
-              child: const Text('شكراً للصديق', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              child: const Text('حسناً', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
             ),
           ],
         );
