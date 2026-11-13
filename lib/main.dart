@@ -104,7 +104,6 @@ class StudioContentManager {
       _audienceCheers,
     ];
     
-    // اختيار فئة عشوائية ثم عنصر عشوائي منها لتنوع مذهل
     final selectedCategory = allCategories[_random.nextInt(allCategories.length)];
     return selectedCategory[_random.nextInt(selectedCategory.length)];
   }
@@ -127,11 +126,30 @@ class _GameScreenState extends State<GameScreen>
   // قائمة لتخزين الأسئلة الخاصة بالجلسة الحالية بدون تكرار
   List<Question> sessionQuestions = [];
 
+  // سلم الجوائز الثابت والمتصاعد بدقة لـ 15 سؤالاً
+  final List<int> prizeLadder = [
+    100,
+    200,
+    300,
+    500,
+    1000,
+    2000,
+    4000,
+    8000,
+    16000,
+    32000,
+    64000,
+    125000,
+    250000,
+    500000,
+    1000000,
+  ];
+
   // متغير لتخزين النص الاحترافي الحالي المتغير مع كل حدث
   String currentStudioMessage = '';
 
-  // تحديد الحد الأقصى بـ 12 سؤالاً
-  final int maxQuestions = 12;
+  // تحديد الحد الأقصى بـ 15 سؤالاً
+  final int maxQuestions = 15;
 
   int timeLeft = 30;
   Timer? _timer;
@@ -140,12 +158,11 @@ class _GameScreenState extends State<GameScreen>
   void initState() {
     super.initState();
     _initializeGameQuestions();
-    // جلب أول عبارة عند بدء اللعبة
     currentStudioMessage = StudioContentManager.getRandomMessage();
     startTimer();
   }
 
-  // دمج واختيار 12 سؤالاً عشوائياً بدون تكرار من قائمة الأسئلة الكلية
+  // دمج واختيار 15 سؤالاً عشوائياً بدون تكرار من قائمة الأسئلة الكلية
   void _initializeGameQuestions() {
     final random = math.Random();
     List<Question> shuffledPool = List.from(arabicTriviaQuestions);
@@ -193,20 +210,18 @@ class _GameScreenState extends State<GameScreen>
       bool isLastQuestion =
           currentQuestionIndex >= totalAllowedQuestions - 1;
 
-      final currentPrize = sessionQuestions[currentQuestionIndex].prizeMoney;
+      // استخدام سلم الجوائز التصاعدي المرتب حسب رقم السؤال الحالي
+      final currentPrize = prizeLadder[currentQuestionIndex.clamp(0, prizeLadder.length - 1)];
 
       setState(() {
         earnedMoney = currentPrize;
-        // تحديث المقولة/المعلومة/التشجيع بعبارة جديدة كلياً عند الانتقال الموفق
         currentStudioMessage = StudioContentManager.getRandomMessage();
       });
 
-      // إظهار النافذة المنبثقة للجائزة عند الإجابة الصحيحة
       _showCorrectAnswerDialog(currentPrize, isLastQuestion);
     } else {
       setState(() {
         isGameOver = true;
-        // تحديث النص عند الخسارة بعبارة تحفيزية جديدة
         currentStudioMessage = StudioContentManager.getRandomMessage();
       });
     }
@@ -280,9 +295,7 @@ class _GameScreenState extends State<GameScreen>
       isGameOver = false;
       hasWon = false;
       earnedMoney = 0;
-      // إعادة خلط وتوليد أسئلة جديدة كلياً عند بدء اللعبة من جديد لمنع التكرار نهائياً
       _initializeGameQuestions();
-      // توليد عبارة جديدة كلياً عند بدء اللعبة من جديد لعدم التكرار
       currentStudioMessage = StudioContentManager.getRandomMessage();
     });
 
@@ -300,6 +313,7 @@ class _GameScreenState extends State<GameScreen>
   Widget build(BuildContext context) {
     int totalAllowedQuestions = sessionQuestions.length;
     final currentQ = sessionQuestions[currentQuestionIndex];
+    final currentPrize = prizeLadder[currentQuestionIndex.clamp(0, prizeLadder.length - 1)];
 
     return Scaffold(
       backgroundColor: const Color(0xFF020817),
@@ -353,7 +367,6 @@ class _GameScreenState extends State<GameScreen>
 
                         const SizedBox(height: 10),
 
-                        // محتوى الشاشة مرتب: صندوق السؤال، تحته الجائزة، المساعدات، الأجوبة، وشريط تقدم النقاط بالأسفل لملء الفراغ
                         Expanded(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -372,10 +385,10 @@ class _GameScreenState extends State<GameScreen>
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              // صندوق الجائزة الحالية
+                              // صندوق الجائزة الحالية المتصاعدة بناءً على سُلّم الجوائز الدقيق
                               SizedBox(
                                 height: 50,
-                                child: _buildCurrentPrizeBox(currentQ.prizeMoney),
+                                child: _buildCurrentPrizeBox(currentPrize),
                               ),
                               const SizedBox(height: 12),
                               // أزرار المساعدة
@@ -410,13 +423,12 @@ class _GameScreenState extends State<GameScreen>
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              // شريط تقدم نقاط اللعبة الاحترافي لملء الفراغ السفلي (لعرض 12 مرحلة)
+                              // شريط تقدم النقاط الدائري المحدث ليدعم 15 مرحلة
                               SizedBox(
                                 height: 35,
                                 child: _buildGameProgressBar(),
                               ),
                               const SizedBox(height: 8),
-                              // المستطيل الاحترافي الجديد للجمهور والحكم مع زيادة الارتفاع ليحتوي النص كاملاً بدون أي اختفاء
                               SizedBox(
                                 height: 62,
                                 child: _buildProfessionalStudioMessageCard(),
@@ -433,7 +445,6 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  // مستطيل احترافي أنيق للجمهور والحكم والمعلومات مع أنيميشن حركي سلس وارتفاع كافٍ
   Widget _buildProfessionalStudioMessageCard() {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 600),
@@ -517,7 +528,7 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  // شريط تقدم نقاط اللعبة الأفقي بالأسفل
+  // شريط تقدم نقاط اللعبة الأفقي بالأسفل ليدعم 15 سؤالاً
   Widget _buildGameProgressBar() {
     int totalStages = sessionQuestions.length;
     return Center(
@@ -544,8 +555,8 @@ class _GameScreenState extends State<GameScreen>
             bool isCurrent = index == currentQuestionIndex;
 
             return Container(
-              width: totalStages > 10 ? 18 : 22,
-              margin: const EdgeInsets.symmetric(horizontal: 2),
+              width: totalStages > 10 ? 16 : 22,
+              margin: const EdgeInsets.symmetric(horizontal: 1.5),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isCurrent
@@ -570,7 +581,7 @@ class _GameScreenState extends State<GameScreen>
                   '${index + 1}',
                   style: TextStyle(
                     color: isCurrent ? Colors.black : Colors.white70,
-                    fontSize: 9,
+                    fontSize: totalStages > 10 ? 8 : 9,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -582,7 +593,6 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  // ودجت صندوق الجائزة الحالية بتصميم مشابه لصندوق السؤال وبحجم مدمج
   Widget _buildCurrentPrizeBox(int prize) {
     return Center(
       child: SizedBox(
@@ -964,7 +974,7 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  // نافذة شجرة الجوائز الكاملة التي تظهر عند الضغط على زر المحفظة في الأعلى
+  // نافذة شجرة الجوائز الكاملة لـ 15 سؤالاً مترتبة تصاعدياً
   void _showPrizeLadder(BuildContext context) {
     int totalAllowedQuestions = sessionQuestions.length;
     showModalBottomSheet(
@@ -995,10 +1005,8 @@ class _GameScreenState extends State<GameScreen>
                   itemCount: totalAllowedQuestions,
                   reverse: true,
                   itemBuilder: (context, index) {
-                    final prize = sessionQuestions[index].prizeMoney;
-
-                    final isCurrent =
-                        index == currentQuestionIndex;
+                    final prize = prizeLadder[index.clamp(0, prizeLadder.length - 1)];
+                    final isCurrent = index == currentQuestionIndex;
 
                     return Container(
                       margin: const EdgeInsets.symmetric(vertical: 3),
