@@ -97,26 +97,81 @@ class _GameScreenState extends State<GameScreen>
       bool isLastQuestion =
           currentQuestionIndex >= arabicTriviaQuestions.length - 1;
 
-      setState(() {
-        earnedMoney =
-            arabicTriviaQuestions[currentQuestionIndex].prizeMoney;
+      final currentPrize = arabicTriviaQuestions[currentQuestionIndex].prizeMoney;
 
-        if (isLastQuestion) {
-          hasWon = true;
-          isGameOver = true;
-        } else {
-          currentQuestionIndex++;
-        }
+      setState(() {
+        earnedMoney = currentPrize;
       });
 
-      if (!isLastQuestion) {
-        startTimer();
-      }
+      // إظهار النافذة المنبثقة للجائزة عند الإجابة الصحيحة
+      _showCorrectAnswerDialog(currentPrize, isLastQuestion);
     } else {
       setState(() {
         isGameOver = true;
       });
     }
+  }
+
+  // نافذة منبثقة للجائزة عند الإجابة الصحيحة
+  void _showCorrectAnswerDialog(int prize, bool isLastQuestion) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF0F172A),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: Colors.amber, width: 1.5),
+          ),
+          title: const Text(
+            '🎉 إجابة صحيحة! 🎉',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 22),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'لقد ربحت حتى الآن مبلغ:',
+                style: TextStyle(color: Colors.white70, fontSize: 15),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                '\$${formatMoney(prize)}',
+                style: const TextStyle(color: Colors.amber, fontSize: 28, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.amber[700],
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                setState(() {
+                  if (isLastQuestion) {
+                    hasWon = true;
+                    isGameOver = true;
+                  } else {
+                    currentQuestionIndex++;
+                    startTimer();
+                  }
+                });
+              },
+              child: Text(
+                isLastQuestion ? 'إنهاء اللعبة' : 'السؤال التالي',
+                style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void restartGame() {
@@ -144,6 +199,19 @@ class _GameScreenState extends State<GameScreen>
 
     return Scaffold(
       backgroundColor: const Color(0xFF020817),
+      appBar: AppBar(
+        title: const Text('من سيربح المليار 🏆', style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 18)),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF0F172A),
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.account_balance_wallet, color: Colors.amber),
+            onPressed: () => _showPrizeLadder(context),
+            tooltip: 'شجرة الجوائز',
+          ),
+        ],
+      ),
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -155,107 +223,78 @@ class _GameScreenState extends State<GameScreen>
                 ? _buildGameOver()
                 : Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
+                      horizontal: 12,
+                      vertical: 8,
                     ),
                     child: Column(
                       children: [
                         SizedBox(
-                          height: 46,
+                          height: 45,
                           child: Row(
                             mainAxisAlignment:
                                 MainAxisAlignment.spaceBetween,
                             children: [
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'من سيربح المليار',
-                                    style: TextStyle(
-                                      color: Color(0xFFFFD77B),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 1),
-                                  Text(
-                                    'السؤال ${currentQuestionIndex + 1} / ${arabicTriviaQuestions.length}',
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                ],
+                              Text(
+                                'السؤال ${currentQuestionIndex + 1} / ${arabicTriviaQuestions.length}',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               _buildTimer(),
                             ],
                           ),
                         ),
 
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 10),
 
-                        // القسم الرئيسي: شجرة الجوائز على اليسار وباقي المحتوى على اليمين بشكل متناسق ومضغوط
+                        // محتوى الشاشة بالكامل أصبح مرتباً بعرض الشاشة وبدون شجرة الجوائز المزعجة
                         Expanded(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              // شجرة الجوائز العمودية على اليسار (مضبوطة لـ 15 مستوى)
+                              // صندوق السؤال بحجم مدمج وقريب للنص
                               SizedBox(
-                                width: 85,
-                                child: _buildPrizeLadder(),
+                                height: 130,
+                                child: AnimatedSwitcher(
+                                  duration: const Duration(
+                                    milliseconds: 300,
+                                  ),
+                                  child: _buildQuestion(
+                                    currentQ.questionText,
+                                  ),
+                                ),
                               ),
-                              const SizedBox(width: 6),
-
-                              // محتوى الأسئلة والاختيارات ووسائل المساعدة
-                              Expanded(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    // صندوق السؤال بحجم مضغوط وقريب للنص
-                                    SizedBox(
-                                      height: 110,
-                                      child: AnimatedSwitcher(
-                                        duration: const Duration(
-                                          milliseconds: 300,
-                                        ),
-                                        child: _buildQuestion(
-                                          currentQ.questionText,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    SizedBox(
-                                      height: 34,
-                                      child: Center(
-                                        child: _buildHelpButtons(),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    // اختيارات بحجم أصغر ومتناسق تماماً
-                                    SizedBox(
-                                      height: 165,
-                                      child: GridView.builder(
-                                        physics:
-                                            const NeverScrollableScrollPhysics(),
-                                        padding: EdgeInsets.zero,
-                                        itemCount: currentQ.options.length,
-                                        gridDelegate:
-                                            const SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: 2,
-                                          childAspectRatio: 2.3,
-                                          crossAxisSpacing: 5,
-                                          mainAxisSpacing: 5,
-                                        ),
-                                        itemBuilder: (context, index) {
-                                          return _buildAnswerButton(
-                                            index,
-                                            currentQ.options[index],
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
+                              const SizedBox(height: 10),
+                              SizedBox(
+                                height: 40,
+                                child: Center(
+                                  child: _buildHelpButtons(),
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              // اختيارات الإجابة بحجم متناسق ومضغوط
+                              SizedBox(
+                                height: 180,
+                                child: GridView.builder(
+                                  physics:
+                                      const NeverScrollableScrollPhysics(),
+                                  padding: EdgeInsets.zero,
+                                  itemCount: currentQ.options.length,
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    childAspectRatio: 2.3,
+                                    crossAxisSpacing: 10,
+                                    mainAxisSpacing: 10,
+                                  ),
+                                  itemBuilder: (context, index) {
+                                    return _buildAnswerButton(
+                                      index,
+                                      currentQ.options[index],
+                                    );
+                                  },
                                 ),
                               ),
                             ],
@@ -270,115 +309,13 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  Widget _buildPrizeLadder() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFF071A35),
-            Color(0xFF020D20),
-            Color(0xFF071A35),
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-        border: Border.all(
-          color: Colors.amber.withOpacity(0.55),
-          width: 1,
-        ),
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.withOpacity(0.15),
-            blurRadius: 10,
-          ),
-        ],
-      ),
-      child: ListView.builder(
-        reverse: true,
-        padding: const EdgeInsets.symmetric(
-          horizontal: 3,
-          vertical: 3,
-        ),
-        itemCount: math.min(15, arabicTriviaQuestions.length),
-        itemBuilder: (context, index) {
-          final questionIndex = index;
-
-          final prize =
-              arabicTriviaQuestions[questionIndex].prizeMoney;
-
-          final isCurrent =
-              questionIndex == currentQuestionIndex;
-
-          return Container(
-            margin: const EdgeInsets.symmetric(vertical: 1.5),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              height: 21,
-              decoration: BoxDecoration(
-                gradient: isCurrent
-                    ? const LinearGradient(
-                        colors: [
-                          Color(0xFFFFE89A),
-                          Color(0xFFFFB82E),
-                          Color(0xFFFFE89A),
-                        ],
-                      )
-                    : const LinearGradient(
-                        colors: [
-                          Color(0xFF10294B),
-                          Color(0xFF07162E),
-                        ],
-                      ),
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(
-                  color: isCurrent
-                      ? const Color(0xFFFFE9A5)
-                      : const Color(0xFF29466C),
-                  width: isCurrent ? 1.5 : 0.8,
-                ),
-                boxShadow: isCurrent
-                    ? [
-                        BoxShadow(
-                          color: Colors.amber.withOpacity(0.6),
-                          blurRadius: 5,
-                          spreadRadius: 1,
-                        ),
-                      ]
-                    : [],
-              ),
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 2),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      '\$${formatMoney(prize)}',
-                      style: TextStyle(
-                        color: isCurrent
-                            ? const Color(0xFF17100A)
-                            : const Color(0xFFFFE6A1),
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   Widget _buildTimer() {
     final timerColor =
         timeLeft <= 10 ? Colors.redAccent : const Color(0xFFFF7043);
 
     return Container(
-      width: 42,
-      height: 42,
+      width: 45,
+      height: 45,
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
@@ -404,26 +341,15 @@ class _GameScreenState extends State<GameScreen>
               ),
             ),
           ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'الوقت',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 6,
-                  fontWeight: FontWeight.bold,
-                ),
+          Center(
+            child: Text(
+              '$timeLeft',
+              style: TextStyle(
+                color: timerColor,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
               ),
-              Text(
-                '$timeLeft',
-                style: TextStyle(
-                  color: timerColor,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),
@@ -438,8 +364,8 @@ class _GameScreenState extends State<GameScreen>
           clipper: QuestionShapeClipper(),
           child: Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 6,
+              horizontal: 16,
+              vertical: 10,
             ),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
@@ -468,9 +394,9 @@ class _GameScreenState extends State<GameScreen>
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  height: 1.2,
+                  height: 1.3,
                   shadows: [
                     Shadow(
                       color: Colors.black,
@@ -496,17 +422,17 @@ class _GameScreenState extends State<GameScreen>
             Icons.groups_outlined,
             'الجمهور',
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 8),
           _buildHelpButton(
             Icons.phone_in_talk_outlined,
             'صديق',
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 8),
           _buildHelpButton(
             Icons.swap_horiz,
             'تبديل',
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 8),
           _buildHelpButton(
             Icons.percent,
             '50:50',
@@ -519,8 +445,8 @@ class _GameScreenState extends State<GameScreen>
   Widget _buildHelpButton(IconData icon, String label) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 6,
-        vertical: 3,
+        horizontal: 8,
+        vertical: 4,
       ),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -529,7 +455,7 @@ class _GameScreenState extends State<GameScreen>
             Color(0xFF06152C),
           ],
         ),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: const Color(0xFF55CFFF),
           width: 1,
@@ -546,14 +472,14 @@ class _GameScreenState extends State<GameScreen>
         children: [
           Icon(
             icon,
-            size: 13,
+            size: 14,
             color: const Color(0xFFFFE6A1),
           ),
-          const SizedBox(width: 2),
+          const SizedBox(width: 4),
           Text(
             label,
             style: const TextStyle(
-              fontSize: 9,
+              fontSize: 11,
               color: Colors.white,
               fontWeight: FontWeight.bold,
             ),
@@ -593,7 +519,7 @@ class _GameScreenState extends State<GameScreen>
               ),
             ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -601,11 +527,11 @@ class _GameScreenState extends State<GameScreen>
                 labels[index],
                 style: const TextStyle(
                   color: Color(0xFFFFD77B),
-                  fontSize: 11,
+                  fontSize: 13,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 1),
+              const SizedBox(height: 2),
               Text(
                 answer,
                 textAlign: TextAlign.center,
@@ -613,7 +539,7 @@ class _GameScreenState extends State<GameScreen>
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 11,
+                  fontSize: 13,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -699,6 +625,7 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
+  // نافذة شجرة الجوائز الكاملة التي تظهر عند الضغط على زر المحفظة في الأعلى
   void _showPrizeLadder(BuildContext context) {
     showModalBottomSheet(
       context: context,
