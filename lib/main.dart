@@ -463,7 +463,7 @@ class _GameScreenState extends State<GameScreen>
               onPressed: () {
                 Navigator.pop(context); // إغلاق نافذة الاختيار الأول
 
-                // إظهار نافذة عداد مدته 10 ثوانٍ للبحث عن الإعلان وتحميله
+                // إظهار نافذة البحث مع فحص مستمر لجاهزية الإعلان بحد أقصى 10 ثوانٍ
                 _showAdSearchingDialog();
               },
               child: const Text(
@@ -477,7 +477,7 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  // دالة عرض نافذة البحث عن الإعلان لمدة 10 ثوانٍ
+  // دالة عرض نافذة البحث مع فحص مستمر لجاهزية الإعلان
   void _showAdSearchingDialog() {
     int searchTimeLeft = 10;
     Timer? searchTimer;
@@ -488,17 +488,36 @@ class _GameScreenState extends State<GameScreen>
       builder: (BuildContext dialogContext) {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
-            // تشغيل مؤقت لمدة 10 ثوانٍ
+            // فحص فوري عند فتح النافذة
+            if (_isAdLoaded && _rewardedAd != null) {
+              searchTimer?.cancel();
+              Navigator.pop(dialogContext);
+              _executeAdOrChangeQuestion();
+              return const SizedBox.shrink();
+            }
+
+            // تشغيل مؤقت للبحث بحد أقصى 10 ثوانٍ مع الفحص المستمر
             searchTimer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
+              // الفحص المستمر لجاهزية الإعلان في كل ثانية
+              if (_isAdLoaded && _rewardedAd != null) {
+                timer.cancel();
+                if (Navigator.canPop(dialogContext)) {
+                  Navigator.pop(dialogContext); // إغلاق نافذة البحث فوراً
+                }
+                _executeAdOrChangeQuestion();
+                return;
+              }
+
               if (searchTimeLeft > 1) {
                 setStateDialog(() {
                   searchTimeLeft--;
                 });
               } else {
                 timer.cancel();
-                Navigator.pop(dialogContext); // إغلاق نافذة البحث تلقائياً بعد 10 ثوانٍ
-
-                // تنفيذ عرض الإعلان الفعلي أو تغيير السؤال بعد انتهاء الـ 10 ثوانٍ
+                if (Navigator.canPop(dialogContext)) {
+                  Navigator.pop(dialogContext); // إغلاق نافذة البحث بعد انتهاء الـ 10 ثوانٍ
+                }
+                // تنفيذ الإعلان أو تغيير السؤال بعد انقضاء مهلة الـ 10 ثوانٍ
                 _executeAdOrChangeQuestion();
               }
             });
@@ -535,7 +554,7 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  // تنفيذ عرض الإعلان أو تغيير السؤال مباشرة بعد انتهاء الـ 10 ثوانٍ
+  // تنفيذ عرض الإعلان أو تغيير السؤال
   void _executeAdOrChangeQuestion() {
     if (_isAdLoaded && _rewardedAd != null) {
       _rewardedAd!.show(
