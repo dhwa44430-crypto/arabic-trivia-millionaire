@@ -249,20 +249,14 @@ class _GameScreenState extends State<GameScreen>
 
                         const SizedBox(height: 10),
 
-                        // محتوى الشاشة متناسق ومميز مع صندوق الجائزة الحالية وصندوق السؤال
+                        // محتوى الشاشة مرتب: صندوق السؤال أولاً، ثم تحته صندوق الجائزة الحالية بحجم مدمج
                         Expanded(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              // صندوق الجائزة الحالية (بنفس تصميم صندوق السؤال)
-                              SizedBox(
-                                height: 75,
-                                child: _buildCurrentPrizeBox(currentQ.prizeMoney),
-                              ),
-                              const SizedBox(height: 8),
                               // صندوق السؤال
                               SizedBox(
-                                height: 125,
+                                height: 110,
                                 child: AnimatedSwitcher(
                                   duration: const Duration(
                                     milliseconds: 300,
@@ -272,17 +266,23 @@ class _GameScreenState extends State<GameScreen>
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 6),
+                              // صندوق الجائزة الحالية (أصبح تحت السؤال وبحجم مدمج للمنتصف)
+                              SizedBox(
+                                height: 55,
+                                child: _buildCurrentPrizeBox(currentQ.prizeMoney),
+                              ),
+                              const SizedBox(height: 6),
                               SizedBox(
                                 height: 38,
                                 child: Center(
                                   child: _buildHelpButtons(),
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 6),
                               // اختيارات الإجابة
                               SizedBox(
-                                height: 175,
+                                height: 165,
                                 child: GridView.builder(
                                   physics:
                                       const NeverScrollableScrollPhysics(),
@@ -315,7 +315,7 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  // ودجت صندوق الجائزة الحالية بتصميم مشابه لصندوق السؤال وبخط ذهبي
+  // ودجت صندوق الجائزة الحالية بتصميم مشابه لصندوق السؤال وبحجم مدمج
   Widget _buildCurrentPrizeBox(int prize) {
     return Center(
       child: SizedBox(
@@ -325,7 +325,7 @@ class _GameScreenState extends State<GameScreen>
           child: Container(
             padding: const EdgeInsets.symmetric(
               horizontal: 14,
-              vertical: 6,
+              vertical: 4,
             ),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
@@ -354,7 +354,7 @@ class _GameScreenState extends State<GameScreen>
                     'جائزة السؤال الحالي: ',
                     style: TextStyle(
                       color: Colors.white70,
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -362,7 +362,7 @@ class _GameScreenState extends State<GameScreen>
                     '\$${formatMoney(prize)}',
                     style: const TextStyle(
                       color: Color(0xFFFFD77B),
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       shadows: [
                         Shadow(
@@ -437,7 +437,7 @@ class _GameScreenState extends State<GameScreen>
           child: Container(
             padding: const EdgeInsets.symmetric(
               horizontal: 16,
-              vertical: 10,
+              vertical: 8,
             ),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
@@ -466,9 +466,9 @@ class _GameScreenState extends State<GameScreen>
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 15,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  height: 1.3,
+                  height: 1.25,
                   shadows: [
                     Shadow(
                       color: Colors.black,
