@@ -430,9 +430,12 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  // نافذة منبثقة بالصيغة المطلوبة "شاهد اعلان لتغير السؤال" مع زر "حسناً"
+  // نافذة منبثقة بالصيغة المطلوبة "شاهد اعلان لتغير السؤال" مع زر "حسناً" وتوقيف العداد مؤقتاً
   void useRewardedAdHelp() {
     if (isPhoneUsed) return;
+
+    // إيقاف العداد مؤقتاً عند فتح نافذة الإعلان
+    _timer?.cancel();
 
     showDialog(
       context: context,
@@ -476,7 +479,7 @@ class _GameScreenState extends State<GameScreen>
                         }
                       });
 
-                      // إظهار رسالة منبثقة "تم تغير السؤال" بعد انتهاء الإعلان
+                      // إظهار رسالة منبثقة "تم تغير السؤال" بعد انتهاء الإعلان وبدء العد من جديد
                       _showQuestionChangedDialog();
                       
                       // إعادة تحميل إعلان جديد للمرة القادمة
@@ -484,7 +487,7 @@ class _GameScreenState extends State<GameScreen>
                     },
                   );
                 } else {
-                  // في حال لم يكتمل تحميل الإعلان لسبب ما، يتم تغيير السؤال مباشرة وتنبيه اللاعب
+                  // في حال لم يكتمل تحميل الإعلان لسبب ما، يتم تغيير السؤال مباشرة وتنبيه اللاعب وبدء العد من جديد
                   setState(() {
                     isPhoneUsed = true;
                     hiddenOptions.clear();
@@ -513,6 +516,7 @@ class _GameScreenState extends State<GameScreen>
   void _showQuestionChangedDialog() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF0F172A),
@@ -529,7 +533,10 @@ class _GameScreenState extends State<GameScreen>
           actions: [
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.amber[700]),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                Navigator.pop(context);
+                startTimer(); // إعادة بدء عداد الوقت من جديد بعد إغلاق رسالة التغيير
+              },
               child: const Text('حسناً', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
             ),
           ],
