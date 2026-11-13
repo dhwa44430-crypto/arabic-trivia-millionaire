@@ -51,6 +51,9 @@ class _GameScreenState extends State<GameScreen>
   bool hasWon = false;
   int earnedMoney = 0;
 
+  // تحديد الحد الأقصى بـ 12 سؤالاً
+  final int maxQuestions = 12;
+
   int timeLeft = 30;
   Timer? _timer;
 
@@ -94,8 +97,9 @@ class _GameScreenState extends State<GameScreen>
         arabicTriviaQuestions[currentQuestionIndex].correctAnswerIndex;
 
     if (isCorrect) {
+      int totalAllowedQuestions = math.min(maxQuestions, arabicTriviaQuestions.length);
       bool isLastQuestion =
-          currentQuestionIndex >= arabicTriviaQuestions.length - 1;
+          currentQuestionIndex >= totalAllowedQuestions - 1;
 
       final currentPrize = arabicTriviaQuestions[currentQuestionIndex].prizeMoney;
 
@@ -194,6 +198,7 @@ class _GameScreenState extends State<GameScreen>
 
   @override
   Widget build(BuildContext context) {
+    int totalAllowedQuestions = math.min(maxQuestions, arabicTriviaQuestions.length);
     final currentQ =
         arabicTriviaQuestions[currentQuestionIndex];
 
@@ -235,7 +240,7 @@ class _GameScreenState extends State<GameScreen>
                                 MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'السؤال ${currentQuestionIndex + 1} / ${arabicTriviaQuestions.length}',
+                                'السؤال ${currentQuestionIndex + 1} / $totalAllowedQuestions',
                                 style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 14,
@@ -306,7 +311,7 @@ class _GameScreenState extends State<GameScreen>
                                 ),
                               ),
                               const SizedBox(height: 15),
-                              // شريط تقدم نقاط اللعبة الاحترافي لملء الفراغ السفلي
+                              // شريط تقدم نقاط اللعبة الاحترافي لملء الفراغ السفلي (لعرض 12 مرحلة)
                               SizedBox(
                                 height: 35,
                                 child: _buildGameProgressBar(),
@@ -325,7 +330,7 @@ class _GameScreenState extends State<GameScreen>
 
   // شريط تقدم نقاط اللعبة الأفقي بالأسفل
   Widget _buildGameProgressBar() {
-    int totalStages = math.min(15, arabicTriviaQuestions.length);
+    int totalStages = math.min(maxQuestions, arabicTriviaQuestions.length);
     return Center(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -772,6 +777,7 @@ class _GameScreenState extends State<GameScreen>
 
   // نافذة شجرة الجوائز الكاملة التي تظهر عند الضغط على زر المحفظة في الأعلى
   void _showPrizeLadder(BuildContext context) {
+    int totalAllowedQuestions = math.min(maxQuestions, arabicTriviaQuestions.length);
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF07162F),
@@ -797,7 +803,7 @@ class _GameScreenState extends State<GameScreen>
               const Divider(color: Colors.amber),
               Expanded(
                 child: ListView.builder(
-                  itemCount: math.min(15, arabicTriviaQuestions.length),
+                  itemCount: totalAllowedQuestions,
                   reverse: true,
                   itemBuilder: (context, index) {
                     final prize =
