@@ -37,6 +37,79 @@ class MillionaireApp extends StatelessWidget {
   }
 }
 
+// ---------------------------------------------------------
+// نظام محتوى الاستوديو المطور (أقوال، معلومات، حكم، تشجيع جمهور)
+// ---------------------------------------------------------
+class StudioContentManager {
+  static final math.Random _random = math.Random();
+
+  static final List<String> _famousQuotes = [
+    '«هل أنت متأكد من هذه الإجابة، أم أنك تريد الانسحاب؟»',
+    '«هذا السؤال يفصلك عن المجد، فكر جيدا!»',
+    '«الجمهور يترقب إجابتك بفارغ الصبر يا أسطورة!»',
+    '«خطوة واحدة تفصلك عن القمة، ركز جيداً.»',
+    '«القرارات الصعبة هي التي تصنع الأبطال الحقيقيين.»',
+    '«العقل السليم في التفكير السليم، خذ وقتك.»',
+    '«الاستوديو كله صامت بانتظار قرارك النهائي!»',
+    '«لا تهاب الصعاب، فالملايين تنتظر البطل المناسب.»',
+    '«الذكاء ليس في معرفة كل شيء، بل في معرفة كيف تفكر.»',
+    '«هذه اللحظات هي التي تبقى في الذاكرة للأبد!»',
+  ];
+
+  static final List<String> _generalInfo = [
+    'هل تعلم؟ الدماغ البشري يولد طاقة كهربائية كافية لتشغيل مصباح صغير.',
+    'هل تعلم؟ العسل هو الطعام الوحيد الذي لا يفسد أبداً ويبقى صالحاً لآلاف السنين.',
+    'هل تعلم؟ النعامة تمتلك عيوناً أكبر من حجم دماغها بالكامل.',
+    'هل تعلم؟ الماء الساخن يتجمد أسرع من الماء البارد في ظروف معينة.',
+    'هل تعلم؟ بصمة الإصبع تختلف لدى البشر تماماً مثل بصمة اللسان.',
+    'هل تعلم؟ اليابان تتكون من أكثر من 6,800 جزيرة مختلفة.',
+    'هل تعلم؟ قلب الحوت الأزرق بحجم سيارة صغيرة، ولسانه يزن كوزن فيل.',
+    'هل تعلم؟ الحبر المستخدم في الأقلام ليس أسوداً بالضرورة بل يتكون من مزيج معقد.',
+    'هل تعلم؟ ضوء الشمس يستغرق حوالي 8 دقائق و20 ثانية ليصل إلى كوكب الأرض.',
+    'هل تعلم؟ النحل يستطيع التعرف على وجوه البشر بدقة مذهلة.',
+  ];
+
+  static final List<String> _wisdoms = [
+    '«من يلاحق عصفورين يفقدهما معاً، ركز على خيار واحد.»',
+    '«رحلة الألف ميل تبدأ بخطوة، وكل سؤال خطوة نحو القمة.»',
+    '«التجربة في معرفة الخطأ هي أول طريق الصواب.»',
+    '«الناجحون لا ينجحون بالصدفة بل بالتخطيط والثقة.»',
+    '«من زرع حصد، ومن فكر وصل إلى مبتغاه.»',
+    '«الوقت كالسيف إن لم تقطعه قطعك، فاستغل وقت إجابتك.»',
+    '«العلم نور، وجهل الإنسان عدو نفسه.»',
+    '«الصبر مفتاح الفرج، والتأنى في التفكير سبيل النجاة.»',
+    '«لا توجد نهايات سيئة، بل هي تجارب لتقوية العقل.»',
+    '«الفرص تأتي لمن ينتظرها بذكاء ويعمل لها.»',
+  ];
+
+  static final List<String> _audienceCheers = [
+    'واو، أنت أسطورة حقيقية!',
+    'استمر، أنت في الطريق الصحيح نحو المليون!',
+    'الجمهور يهتف باسمك، لا تخيب ظنهم!',
+    'عاش الذكاء، إجابة في الصميم!',
+    'ما شاء الله، إجابة عبقرية من لاعب محترف!',
+    'الكل واقف على أطراف أصابعه بانتظار إبداعك!',
+    'استمر يا بطل، القمة أصبحت قريبة جداً!',
+    'تفجير إبداعي، أنت الملك اليوم!',
+    'الجمهور يصفق لك بحرارة شديدة!',
+    'خطوات واثقة وثابتة نحو المجد!',
+  ];
+
+  // دمج كل القوائم واختيار عبارة فريدة ومتجددة
+  static String getRandomMessage() {
+    final List<List<String>> allCategories = [
+      _famousQuotes,
+      _generalInfo,
+      _wisdoms,
+      _audienceCheers,
+    ];
+    
+    // اختيار فئة عشوائية ثم عنصر عشوائي منها لتنوع مذهل
+    final selectedCategory = allCategories[_random.nextInt(allCategories.length)];
+    return selectedCategory[_random.nextInt(selectedCategory.length)];
+  }
+}
+
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
 
@@ -51,6 +124,9 @@ class _GameScreenState extends State<GameScreen>
   bool hasWon = false;
   int earnedMoney = 0;
 
+  // متغير لتخزين النص الاحترافي الحالي المتغير مع كل حدث
+  String currentStudioMessage = '';
+
   // تحديد الحد الأقصى بـ 12 سؤالاً
   final int maxQuestions = 12;
 
@@ -60,6 +136,8 @@ class _GameScreenState extends State<GameScreen>
   @override
   void initState() {
     super.initState();
+    // جلب أول عبارة عند بدء اللعبة
+    currentStudioMessage = StudioContentManager.getRandomMessage();
     startTimer();
   }
 
@@ -105,6 +183,8 @@ class _GameScreenState extends State<GameScreen>
 
       setState(() {
         earnedMoney = currentPrize;
+        // تحديث المقولة/المعلومة/التشجيع بعبارة جديدة كلياً عند الانتقال الموفق
+        currentStudioMessage = StudioContentManager.getRandomMessage();
       });
 
       // إظهار النافذة المنبثقة للجائزة عند الإجابة الصحيحة
@@ -112,6 +192,8 @@ class _GameScreenState extends State<GameScreen>
     } else {
       setState(() {
         isGameOver = true;
+        // تحديث النص عند الخسارة بعبارة تحفيزية جديدة
+        currentStudioMessage = StudioContentManager.getRandomMessage();
       });
     }
   }
@@ -184,6 +266,8 @@ class _GameScreenState extends State<GameScreen>
       isGameOver = false;
       hasWon = false;
       earnedMoney = 0;
+      // توليد عبارة جديدة كلياً عند بدء اللعبة من جديد لعدم التكرار
+      currentStudioMessage = StudioContentManager.getRandomMessage();
     });
 
     startTimer();
@@ -310,11 +394,17 @@ class _GameScreenState extends State<GameScreen>
                                   },
                                 ),
                               ),
-                              const SizedBox(height: 15),
+                              const SizedBox(height: 12),
                               // شريط تقدم نقاط اللعبة الاحترافي لملء الفراغ السفلي (لعرض 12 مرحلة)
                               SizedBox(
                                 height: 35,
                                 child: _buildGameProgressBar(),
+                              ),
+                              const SizedBox(height: 8),
+                              // المستطيل الاحترافي الجديد للجمهور والحكم مع أنيميشن ناعم (مباشرة تحت شريط النقاط الدوائر)
+                              SizedBox(
+                                height: 46,
+                                child: _buildProfessionalStudioMessageCard(),
                               ),
                             ],
                           ),
@@ -324,6 +414,89 @@ class _GameScreenState extends State<GameScreen>
                   ),
           ),
         ],
+      ),
+    );
+  }
+
+  // مستطيل احترافي أنيق للجمهور والحكم والمعلومات مع أنيميشن حركي سلس
+  Widget _buildProfessionalStudioMessageCard() {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 600),
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.3),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutBack)),
+            child: child,
+          ),
+        );
+      },
+      child: Container(
+        key: ValueKey<String>(currentStudioMessage),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF132B4D),
+              Color(0xFF071326),
+              Color(0xFF132B4D),
+            ],
+            begin: Alignment.centerRight,
+            end: Alignment.centerLeft,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFFFFD77B).withOpacity(0.6),
+            width: 1.3,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.amber.withOpacity(0.18),
+              blurRadius: 8,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.auto_awesome,
+              color: Color(0xFFFFD77B),
+              size: 16,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                currentStudioMessage,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Color(0xFFFFEFA6),
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black,
+                      blurRadius: 3,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(
+              Icons.campaign_outlined,
+              color: Color(0xFFFFD77B),
+              size: 16,
+            ),
+          ],
+        ),
       ),
     );
   }
