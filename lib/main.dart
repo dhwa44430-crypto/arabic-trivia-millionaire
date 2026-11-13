@@ -124,6 +124,9 @@ class _GameScreenState extends State<GameScreen>
   bool hasWon = false;
   int earnedMoney = 0;
 
+  // قائمة لتخزين الأسئلة الخاصة بالجلسة الحالية بدون تكرار
+  List<Question> sessionQuestions = [];
+
   // متغير لتخزين النص الاحترافي الحالي المتغير مع كل حدث
   String currentStudioMessage = '';
 
@@ -136,9 +139,20 @@ class _GameScreenState extends State<GameScreen>
   @override
   void initState() {
     super.initState();
+    _initializeGameQuestions();
     // جلب أول عبارة عند بدء اللعبة
     currentStudioMessage = StudioContentManager.getRandomMessage();
     startTimer();
+  }
+
+  // دمج واختيار 12 سؤالاً عشوائياً بدون تكرار من قائمة الأسئلة الكلية
+  void _initializeGameQuestions() {
+    final random = math.Random();
+    List<Question> shuffledPool = List.from(arabicTriviaQuestions);
+    shuffledPool.shuffle(random);
+    
+    int count = math.min(maxQuestions, shuffledPool.length);
+    sessionQuestions = shuffledPool.sublist(0, count);
   }
 
   void startTimer() {
@@ -172,14 +186,14 @@ class _GameScreenState extends State<GameScreen>
     _timer?.cancel();
 
     bool isCorrect = selectedIndex ==
-        arabicTriviaQuestions[currentQuestionIndex].correctAnswerIndex;
+        sessionQuestions[currentQuestionIndex].correctAnswerIndex;
 
     if (isCorrect) {
-      int totalAllowedQuestions = math.min(maxQuestions, arabicTriviaQuestions.length);
+      int totalAllowedQuestions = sessionQuestions.length;
       bool isLastQuestion =
           currentQuestionIndex >= totalAllowedQuestions - 1;
 
-      final currentPrize = arabicTriviaQuestions[currentQuestionIndex].prizeMoney;
+      final currentPrize = sessionQuestions[currentQuestionIndex].prizeMoney;
 
       setState(() {
         earnedMoney = currentPrize;
@@ -266,6 +280,8 @@ class _GameScreenState extends State<GameScreen>
       isGameOver = false;
       hasWon = false;
       earnedMoney = 0;
+      // إعادة خلط وتوليد أسئلة جديدة كلياً عند بدء اللعبة من جديد لمنع التكرار نهائياً
+      _initializeGameQuestions();
       // توليد عبارة جديدة كلياً عند بدء اللعبة من جديد لعدم التكرار
       currentStudioMessage = StudioContentManager.getRandomMessage();
     });
@@ -282,9 +298,8 @@ class _GameScreenState extends State<GameScreen>
 
   @override
   Widget build(BuildContext context) {
-    int totalAllowedQuestions = math.min(maxQuestions, arabicTriviaQuestions.length);
-    final currentQ =
-        arabicTriviaQuestions[currentQuestionIndex];
+    int totalAllowedQuestions = sessionQuestions.length;
+    final currentQ = sessionQuestions[currentQuestionIndex];
 
     return Scaffold(
       backgroundColor: const Color(0xFF020817),
@@ -504,7 +519,7 @@ class _GameScreenState extends State<GameScreen>
 
   // شريط تقدم نقاط اللعبة الأفقي بالأسفل
   Widget _buildGameProgressBar() {
-    int totalStages = math.min(maxQuestions, arabicTriviaQuestions.length);
+    int totalStages = sessionQuestions.length;
     return Center(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -951,7 +966,7 @@ class _GameScreenState extends State<GameScreen>
 
   // نافذة شجرة الجوائز الكاملة التي تظهر عند الضغط على زر المحفظة في الأعلى
   void _showPrizeLadder(BuildContext context) {
-    int totalAllowedQuestions = math.min(maxQuestions, arabicTriviaQuestions.length);
+    int totalAllowedQuestions = sessionQuestions.length;
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF07162F),
@@ -980,8 +995,7 @@ class _GameScreenState extends State<GameScreen>
                   itemCount: totalAllowedQuestions,
                   reverse: true,
                   itemBuilder: (context, index) {
-                    final prize =
-                        arabicTriviaQuestions[index].prizeMoney;
+                    final prize = sessionQuestions[index].prizeMoney;
 
                     final isCurrent =
                         index == currentQuestionIndex;
