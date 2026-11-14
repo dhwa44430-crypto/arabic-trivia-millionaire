@@ -20,9 +20,13 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.x'
+          flutter-version: 'stable'
           channel: 'stable'
           cache: true
+
+      - name: Install Android SDK 35
+        run: |
+          yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager "platforms;android-35" "build-tools;35.0.0" || true
 
       - name: Create Clean Flutter Project & Copy Files
         run: |
@@ -49,6 +53,11 @@ jobs:
           if ! grep -q "minSdkVersion 21" temp_app/android/app/build.gradle; then
             sed -i '/defaultConfig {/a \        minSdkVersion 21' temp_app/android/app/build.gradle
           fi
+
+          sed -i 's/compileSdk.*/compileSdk 35/g' temp_app/android/app/build.gradle || true
+          sed -i 's/targetSdk.*/targetSdk 35/g' temp_app/android/app/build.gradle || true
+          sed -i 's/compileSdkVersion.*/compileSdkVersion 35/g' temp_app/android/app/build.gradle || true
+          sed -i 's/targetSdkVersion.*/targetSdkVersion 35/g' temp_app/android/app/build.gradle || true
 
           sed -i "s/ext.kotlin_version = '.*'/ext.kotlin_version = '1.9.24'/g" temp_app/android/build.gradle || true
 
