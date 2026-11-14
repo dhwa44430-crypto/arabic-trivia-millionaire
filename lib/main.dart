@@ -282,7 +282,7 @@ class _GameScreenState extends State<GameScreen>
     super.dispose();
   }
 
-  void answerQuestion(int selectedIndex) {
+  void answerQuestion(int selectedIndex) async {
     if (isCheckingAnswer || isRevealingAnswer || hiddenOptions.contains(selectedIndex)) return; // منع الضغط المتكرر أو الخيار المحذوف
 
     _timer?.cancel(); // إيقاف العداد فور الضغط وحبس الأنفاس
@@ -293,7 +293,7 @@ class _GameScreenState extends State<GameScreen>
     });
 
     // المرحلة الأولى: الانتظار لمدة ثانيتين واللون أصفر (التشويق وبدون صوت)
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 2), () async {
       if (!mounted) return;
 
       bool isCorrect = selectedIndex ==
@@ -305,12 +305,14 @@ class _GameScreenState extends State<GameScreen>
         lastAnswerWasCorrect = isCorrect;
       });
 
-      // المرحلة الثانية: ظهور النتيجة وتشغيل الصوت في نفس اللحظة بالضبط
+      // المرحلة الثانية: ظهور النتيجة وتشغيل الصوت في نفس اللحظة بالضبط مع إيقاف وضبط المؤشر للصفر بالـ await
       if (isCorrect) {
-        _correctPlayer.seek(Duration.zero);
+        await _correctPlayer.stop();
+        await _correctPlayer.seek(Duration.zero);
         _correctPlayer.resume();
       } else {
-        _wrongPlayer.seek(Duration.zero);
+        await _wrongPlayer.stop();
+        await _wrongPlayer.seek(Duration.zero);
         _wrongPlayer.resume();
       }
 
