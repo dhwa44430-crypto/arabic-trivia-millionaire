@@ -460,5 +460,4 @@ final List<Question> arabicTriviaQuestions = [
     options: ['المريخ', 'عطارد', 'الزهرة', 'المشتري'],
     correctAnswerIndex: 1,
   ),
-  // ... بقية الأسئلة الخاصة بك
 ];
