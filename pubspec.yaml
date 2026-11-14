@@ -20,5 +20,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - correct.mp3
-    - wrong.mp3
+    - assets/sounds/
