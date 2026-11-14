@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'questions.dart';
+import 'quotes.dart'; // استدعاء ملف الأقوال والحكم والأسئلة الأخير
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:google_mobile_ads/google_mobile_ads.dart'; // حزمة أدموب الرسمية
