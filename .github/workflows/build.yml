@@ -34,38 +34,57 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           manifest = Path("temp_app/android/app/src/main/AndroidManifest.xml")
-          text = manifest.read_text()
-          if "com.google.android.gms.ads.APPLICATION_ID" not in text:
-              text = text.replace(
-                  "</application>",
-                  '        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-3940256099942544~3347511713"/>\n    </application>'
-              )
-          manifest.write_text(text)
+          if manifest.exists():
+              text = manifest.read_text()
+              if "com.google.android.gms.ads.APPLICATION_ID" not in text:
+                  text = text.replace(
+                      "</application>",
+                      '        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-3940256099942544~3347511713"/>\n    </application>'
+                  )
+              manifest.write_text(text)
+
+          app_gradle = Path("temp_app/android/app/build.gradle")
+          if not app_gradle.exists():
+              app_gradle = Path("temp_app/android/app/build.gradle.kts")
+          
+          if app_gradle.exists():
+              content = app_gradle.read_text()
+              content = content.replace("flutter.minSdkVersion", "21")
+              if "minSdkVersion" not in content and "minSdk" not in content:
+                  content = content.replace("defaultConfig {", "defaultConfig {\n        minSdkVersion 21")
+              app_gradle.write_text(content)
+
+          root_gradle = Path("temp_app/android/build.gradle")
+          if not root_gradle.exists():
+              root_gradle = Path("temp_app/android/build.gradle.kts")
+          
+          if root_gradle.exists():
+              rcontent = root_gradle.read_text()
+              if "kotlin_version" not in rcontent:
+                  rcontent = "buildscript { ext.kotlin_version = '1.9.24' }\n" + rcontent
+              root_gradle.write_text(rcontent)
           PY
+
+          GRADLE_FILE="temp_app/android/app/build.gradle"
+          [ -f "$GRADLE_FILE" ] || GRADLE_FILE="temp_app/android/app/build.gradle.kts"
+
+          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' "$GRADLE_FILE" || true
+          sed -i 's/compileSdk.*/compileSdk 35/g' "$GRADLE_FILE" || true
+          sed -i 's/targetSdk.*/targetSdk 35/g' "$GRADLE_FILE" || true
+          sed -i 's/compileSdkVersion.*/compileSdkVersion 35/g' "$GRADLE_FILE" || true
+          sed -i 's/targetSdkVersion.*/targetSdkVersion 35/g' "$GRADLE_FILE" || true
+
+          ROOT_GRADLE="temp_app/android/build.gradle"
+          [ -f "$ROOT_GRADLE" ] || ROOT_GRADLE="temp_app/android/build.gradle.kts"
+
+          sed -i "s/ext.kotlin_version = '.*'/ext.kotlin_version = '1.9.24'/g" "$ROOT_GRADLE" || true
 
           rm -rf temp_app/lib/*
           cp -r lib/* temp_app/lib/
           cp pubspec.yaml temp_app/
 
-          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' temp_app/android/app/build.gradle || true
-
-          if ! grep -q "minSdkVersion 21" temp_app/android/app/build.gradle; then
-            sed -i '/defaultConfig {/a \        minSdkVersion 21' temp_app/android/app/build.gradle
-          fi
-
-          sed -i 's/compileSdk.*/compileSdk 35/g' temp_app/android/app/build.gradle || true
-          sed -i 's/targetSdk.*/targetSdk 35/g' temp_app/android/app/build.gradle || true
-          sed -i 's/compileSdkVersion.*/compileSdkVersion 35/g' temp_app/android/app/build.gradle || true
-          sed -i 's/targetSdkVersion.*/targetSdkVersion 35/g' temp_app/android/app/build.gradle || true
-
-          sed -i "s/ext.kotlin_version = '.*'/ext.kotlin_version = '1.9.24'/g" temp_app/android/build.gradle || true
-
-          if ! grep -q "ext.kotlin_version" temp_app/android/build.gradle; then
-            sed -i "1i buildscript { ext.kotlin_version = '1.9.24' }" temp_app/android/build.gradle
-          fi
-
-          sed -i "s/id 'org.jetbrains.kotlin.android' version '[^']*'/id 'org.jetbrains.kotlin.android' version '1.9.24'/g" temp_app/android/settings.gradle
-          sed -i 's/id "org.jetbrains.kotlin.android" version "[^"]*"/id "org.jetbrains.kotlin.android" version "1.9.24"/g' temp_app/android/settings.gradle
+          sed -i "s/id 'org.jetbrains.kotlin.android' version '[^']*'/id 'org.jetbrains.kotlin.android' version '1.9.24'/g" temp_app/android/settings.gradle || true
+          sed -i 's/id "org.jetbrains.kotlin.android" version "[^"]*"/id "org.jetbrains.kotlin.android" version "1.9.24"/g' temp_app/android/settings.gradle || true
 
           cd temp_app
           flutter pub get
