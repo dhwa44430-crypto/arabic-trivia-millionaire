@@ -27,8 +27,8 @@ jobs:
       - name: Install Android SDK 35
         uses: android-actions/setup-android@v3
         with:
-          platforms: android-35
-          build-tools: 35.0.0
+          packages: 'platforms;android-35 build-tools;35.0.0'
+          accept-android-sdk-licenses: true
 
       - name: Create Clean Flutter Project & Copy Files
         run: |
