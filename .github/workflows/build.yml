@@ -1,3 +1,4 @@
+
 name: Build APK & App Bundle
 
 on:
@@ -30,64 +31,111 @@ jobs:
           packages: 'platforms;android-35 build-tools;35.0.0'
           accept-android-sdk-licenses: true
 
+      - name: Reinstall Android SDK 35
+        run: |
+          yes | sdkmanager --uninstall "platforms;android-35" || true
+          yes | sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
       - name: Create Clean Flutter Project & Copy Files
         run: |
           flutter create temp_app --org com.arabictrivia --project-name arabic_trivia_millionaire
 
           python3 - <<'PY'
           from pathlib import Path
+          import re
+
+          # إعداد AndroidManifest وإضافة معرف AdMob
           manifest = Path("temp_app/android/app/src/main/AndroidManifest.xml")
           if manifest.exists():
               text = manifest.read_text()
+
               if "com.google.android.gms.ads.APPLICATION_ID" not in text:
                   text = text.replace(
                       "</application>",
                       '        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-3940256099942544~3347511713"/>\n    </application>'
                   )
+
               manifest.write_text(text)
 
+          # ضبط إعدادات تطبيق Android
           app_gradle = Path("temp_app/android/app/build.gradle")
           if not app_gradle.exists():
               app_gradle = Path("temp_app/android/app/build.gradle.kts")
-          
+
           if app_gradle.exists():
               content = app_gradle.read_text()
-              content = content.replace("flutter.minSdkVersion", "21")
-              if "minSdkVersion" not in content and "minSdk" not in content:
-                  content = content.replace("defaultConfig {", "defaultConfig {\n        minSdkVersion 21")
+
+              content = re.sub(
+                  r'(?m)^([ \t]*compileSdk(?:Version)?[ \t]*(?:=[ \t]*)?).+$',
+                  r'\g<1>35',
+                  content
+              )
+
+              content = re.sub(
+                  r'(?m)^([ \t]*minSdk(?:Version)?[ \t]*(?:=[ \t]*)?).+$',
+                  r'\g<1>21',
+                  content
+              )
+
+              content = re.sub(
+                  r'(?m)^([ \t]*targetSdk(?:Version)?[ \t]*(?:=[ \t]*)?).+$',
+                  r'\g<1>35',
+                  content
+              )
+
               app_gradle.write_text(content)
 
-          root_gradle = Path("temp_app/android/build.gradle")
-          if not root_gradle.exists():
-              root_gradle = Path("temp_app/android/build.gradle.kts")
-          
-          if root_gradle.exists():
-              rcontent = root_gradle.read_text()
-              if "kotlin_version" not in rcontent:
-                  rcontent = "buildscript { ext.kotlin_version = '1.9.24' }\n" + rcontent
-              root_gradle.write_text(rcontent)
+          # ضبط إصدارات Android Gradle Plugin و Kotlin
+          settings_gradle = Path("temp_app/android/settings.gradle")
+          if not settings_gradle.exists():
+              settings_gradle = Path("temp_app/android/settings.gradle.kts")
+
+          if settings_gradle.exists():
+              content = settings_gradle.read_text()
+
+              content = re.sub(
+                  r'(id\s+["\']com\.android\.application["\']\s+version\s+["\'])[^"\']+(["\'])',
+                  r'\g<1>8.6.1\2',
+                  content
+              )
+
+              content = re.sub(
+                  r'(id\s+["\']org\.jetbrains\.kotlin\.android["\']\s+version\s+["\'])[^"\']+(["\'])',
+                  r'\g<1>1.9.24\2',
+                  content
+              )
+
+              settings_gradle.write_text(content)
+
+          # ضبط إصدار Gradle Wrapper
+          wrapper = Path("temp_app/android/gradle/wrapper/gradle-wrapper.properties")
+
+          if wrapper.exists():
+              content = wrapper.read_text()
+
+              content = re.sub(
+                  r'distributionUrl=.*',
+                  'distributionUrl=https\\://services.gradle.org/distributions/gradle-8.7-all.zip',
+                  content
+              )
+
+              wrapper.write_text(content)
           PY
 
-          GRADLE_FILE="temp_app/android/app/build.gradle"
-          [ -f "$GRADLE_FILE" ] || GRADLE_FILE="temp_app/android/app/build.gradle.kts"
-
-          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' "$GRADLE_FILE" || true
-          sed -i 's/compileSdk.*/compileSdk 35/g' "$GRADLE_FILE" || true
-          sed -i 's/targetSdk.*/targetSdk 35/g' "$GRADLE_FILE" || true
-          sed -i 's/compileSdkVersion.*/compileSdkVersion 35/g' "$GRADLE_FILE" || true
-          sed -i 's/targetSdkVersion.*/targetSdkVersion 35/g' "$GRADLE_FILE" || true
-
-          ROOT_GRADLE="temp_app/android/build.gradle"
-          [ -f "$ROOT_GRADLE" ] || ROOT_GRADLE="temp_app/android/build.gradle.kts"
-
-          sed -i "s/ext.kotlin_version = '.*'/ext.kotlin_version = '1.9.24'/g" "$ROOT_GRADLE" || true
-
+          # نسخ ملفات التطبيق الأصلية
           rm -rf temp_app/lib/*
-          cp -r lib/* temp_app/lib/
+          cp -r lib/. temp_app/lib/
+
+          # نسخ ملفات pubspec
           cp pubspec.yaml temp_app/
 
-          sed -i "s/id 'org.jetbrains.kotlin.android' version '[^']*'/id 'org.jetbrains.kotlin.android' version '1.9.24'/g" temp_app/android/settings.gradle || true
-          sed -i 's/id "org.jetbrains.kotlin.android" version "[^"]*"/id "org.jetbrains.kotlin.android" version "1.9.24"/g' temp_app/android/settings.gradle || true
+          # نسخ مجلد الأصول إذا كان موجوداً
+          if [ -d assets ]; then
+            cp -r assets temp_app/
+          fi
+
+          # ضمان وجود مسار الأصوات المشار إليه في pubspec.yaml
+          mkdir -p temp_app/assets/sounds
 
           cd temp_app
           flutter pub get
