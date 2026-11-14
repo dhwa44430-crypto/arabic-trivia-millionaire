@@ -94,6 +94,12 @@ class _GameScreenState extends State<GameScreen>
   final AudioPlayer _correctPlayer = AudioPlayer();
   final AudioPlayer _wrongPlayer = AudioPlayer();
 
+  // متغيرات تتبع حالات التشويق وإظهار النتيجة لمنع الضغط السريع
+  int? selectedAnswerIndex;
+  bool isCheckingAnswer = false; // مرحلة الانتظار باللون الأصفر (التشويق لمدة ثانيتين)
+  bool isRevealingAnswer = false; // مرحلة إظهار النتيجة باللون الأخضر أو الأحمر مع الصوت (لمدة ثانية)
+  bool? lastAnswerWasCorrect;
+
   // متغيرات تتبع وسائل المساعدة (لكي تستخدم مرة واحدة فقط)
   bool isAudienceUsed = false;
   bool isPhoneUsed = false; // تتبع استخدام فرصة ثانية (إعلان المكافأة)
@@ -277,42 +283,68 @@ class _GameScreenState extends State<GameScreen>
   }
 
   void answerQuestion(int selectedIndex) {
-    if (hiddenOptions.contains(selectedIndex)) return; // منع الضغط على الخيار المحذوف
+    if (isCheckingAnswer || isRevealingAnswer || hiddenOptions.contains(selectedIndex)) return; // منع الضغط المتكرر أو الخيار المحذوف
 
-    _timer?.cancel();
+    _timer?.cancel(); // إيقاف العداد فور الضغط وحبس الأنفاس
 
-    bool isCorrect = selectedIndex ==
-        sessionQuestions[currentQuestionIndex].correctAnswerIndex;
+    setState(() {
+      isCheckingAnswer = true;
+      selectedAnswerIndex = selectedIndex;
+    });
 
-    if (isCorrect) {
-      // تشغيل صوت الإجابة الصحيحة فوراً بدون أي تأخير
-      _correctPlayer.seek(Duration.zero);
-      _correctPlayer.resume();
+    // المرحلة الأولى: الانتظار لمدة ثانيتين واللون أصفر (التشويق وبدون صوت)
+    Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
 
-      int totalAllowedQuestions = sessionQuestions.length;
-      bool isLastQuestion =
-          currentQuestionIndex >= totalAllowedQuestions - 1;
-
-      // استخدام سلم الجوائز التصاعدي المرتب حسب رقم السؤال الحالي
-      final currentPrize = prizeLadder[currentQuestionIndex.clamp(0, prizeLadder.length - 1)];
+      bool isCorrect = selectedIndex ==
+          sessionQuestions[currentQuestionIndex].correctAnswerIndex;
 
       setState(() {
-        earnedMoney = currentPrize;
-        currentStudioMessage = StudioContentManager.getRandomMessage();
-        hiddenOptions.clear(); // إعادة تعيين الخيارات المخفية للسؤال التالي
+        isCheckingAnswer = false;
+        isRevealingAnswer = true;
+        lastAnswerWasCorrect = isCorrect;
       });
 
-      _showCorrectAnswerDialog(currentPrize, isLastQuestion);
-    } else {
-      // تشغيل صوت الإجابة الخاطئة فوراً بدون أي تأخير
-      _wrongPlayer.seek(Duration.zero);
-      _wrongPlayer.resume();
+      // المرحلة الثانية: ظهور النتيجة وتشغيل الصوت في نفس اللحظة بالضبط
+      if (isCorrect) {
+        _correctPlayer.seek(Duration.zero);
+        _correctPlayer.resume();
+      } else {
+        _wrongPlayer.seek(Duration.zero);
+        _wrongPlayer.resume();
+      }
 
-      setState(() {
-        isGameOver = true;
-        currentStudioMessage = StudioContentManager.getRandomMessage();
+      // التوقف لمدة ثانية واحدة باللون الأخضر أو الأحمر مع الصوت، ثم الانتقال للنتيجة النهائية
+      Future.delayed(const Duration(seconds: 1), () {
+        if (!mounted) return;
+
+        setState(() {
+          isRevealingAnswer = false;
+          selectedAnswerIndex = null;
+        });
+
+        if (isCorrect) {
+          int totalAllowedQuestions = sessionQuestions.length;
+          bool isLastQuestion =
+              currentQuestionIndex >= totalAllowedQuestions - 1;
+
+          final currentPrize = prizeLadder[currentQuestionIndex.clamp(0, prizeLadder.length - 1)];
+
+          setState(() {
+            earnedMoney = currentPrize;
+            currentStudioMessage = StudioContentManager.getRandomMessage();
+            hiddenOptions.clear(); // إعادة تعيين الخيارات المخفية للسؤال التالي
+          });
+
+          _showCorrectAnswerDialog(currentPrize, isLastQuestion);
+        } else {
+          setState(() {
+            isGameOver = true;
+            currentStudioMessage = StudioContentManager.getRandomMessage();
+          });
+        }
       });
-    }
+    });
   }
 
   // نافذة منبثقة للجائزة عند الإجابة الصحيحة
@@ -750,6 +782,10 @@ class _GameScreenState extends State<GameScreen>
       isPhoneUsed = false;
       isSwapUsed = false;
       isFiftyFiftyUsed = false;
+      selectedAnswerIndex = null;
+      isCheckingAnswer = false;
+      isRevealingAnswer = false;
+      lastAnswerWasCorrect = null;
       hiddenOptions.clear();
       _initializeGameQuestions();
       currentStudioMessage = StudioContentManager.getRandomMessage();
@@ -1296,13 +1332,45 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  // أزرار الإجابات مع الحفاظ على الشكل الأصلي وإطار ذهبي يحيط به بالكامل من الأربع جهات
+  // أزرار الإجابات مع دعم التلوين التلقائي حسب مراحل التشويق والنتيجة
   Widget _buildAnswerButton(int index, String answer) {
     const labels = ['A', 'B', 'C', 'D'];
     bool isHidden = hiddenOptions.contains(index);
 
     if (isHidden) {
       return const SizedBox.shrink(); // إخفاء الخيار في حال تم استخدام 50:50
+    }
+
+    bool isSelected = selectedAnswerIndex == index;
+
+    List<Color> gradientColors = [
+      const Color(0xFF19365D),
+      const Color(0xFF07162F),
+      const Color(0xFF19365D),
+    ];
+
+    if (isCheckingAnswer && isSelected) {
+      // المرحلة الأولى: اللون الأصفر أثناء التشويق (لمدة ثانيتين)
+      gradientColors = [
+        Colors.amber[800]!,
+        Colors.amber[600]!,
+        Colors.amber[800]!,
+      ];
+    } else if (isRevealingAnswer && isSelected) {
+      // المرحلة الثانية: أخضر إذا صحيح أو أحمر إذا خطأ (مع ظهور الصوت فجأة في نفس اللحظة)
+      if (lastAnswerWasCorrect == true) {
+        gradientColors = [
+          Colors.green[800]!,
+          Colors.green[600]!,
+          Colors.green[800]!,
+        ];
+      } else {
+        gradientColors = [
+          Colors.red[800]!,
+          Colors.red[600]!,
+          Colors.red[800]!,
+        ];
+      }
     }
 
     return InkWell(
@@ -1312,13 +1380,9 @@ class _GameScreenState extends State<GameScreen>
         child: ClipPath(
           clipper: AnswerShapeClipper(),
           child: Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Color(0xFF19365D),
-                  Color(0xFF07162F),
-                  Color(0xFF19365D),
-                ],
+                colors: gradientColors,
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -1329,8 +1393,10 @@ class _GameScreenState extends State<GameScreen>
               children: [
                 Text(
                   labels[index],
-                  style: const TextStyle(
-                    color: Color(0xFFFFD77B),
+                  style: TextStyle(
+                    color: (isCheckingAnswer || isRevealingAnswer) && isSelected
+                        ? Colors.black
+                        : const Color(0xFFFFD77B),
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1341,8 +1407,10 @@ class _GameScreenState extends State<GameScreen>
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: (isCheckingAnswer || isRevealingAnswer) && isSelected
+                        ? Colors.black
+                        : Colors.white,
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                   ),
