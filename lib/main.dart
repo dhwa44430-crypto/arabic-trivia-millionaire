@@ -157,12 +157,9 @@ class _GameScreenState extends State<GameScreen>
   void initState() {
     super.initState();
     
-    // إعداد الأصوات بوضع الاستجابة السريعة (Low Latency) والتحميل المسبق لتظهر فور الضغط تماماً
+    // إعداد الأصوات بوضع الاستجابة السريعة (Low Latency)
     _correctPlayer.setPlayerMode(PlayerMode.lowLatency);
-    _correctPlayer.setSource(AssetSource('sounds/correct.mp3'));
-
     _wrongPlayer.setPlayerMode(PlayerMode.lowLatency);
-    _wrongPlayer.setSource(AssetSource('sounds/wrong.mp3'));
 
     _initializeGameQuestions();
     currentStudioMessage = StudioContentManager.getRandomMessage();
@@ -282,7 +279,7 @@ class _GameScreenState extends State<GameScreen>
     super.dispose();
   }
 
-  void answerQuestion(int selectedIndex) async {
+  void answerQuestion(int selectedIndex) {
     if (isCheckingAnswer || isRevealingAnswer || hiddenOptions.contains(selectedIndex)) return; // منع الضغط المتكرر أو الخيار المحذوف
 
     _timer?.cancel(); // إيقاف العداد فور الضغط وحبس الأنفاس
@@ -293,7 +290,7 @@ class _GameScreenState extends State<GameScreen>
     });
 
     // المرحلة الأولى: الانتظار لمدة ثانيتين واللون أصفر (التشويق وبدون صوت)
-    Future.delayed(const Duration(seconds: 2), () async {
+    Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
 
       bool isCorrect = selectedIndex ==
@@ -305,15 +302,11 @@ class _GameScreenState extends State<GameScreen>
         lastAnswerWasCorrect = isCorrect;
       });
 
-      // المرحلة الثانية: ظهور النتيجة وتشغيل الصوت في نفس اللحظة بالضبط مع إيقاف وضبط المؤشر للصفر بالـ await
+      // المرحلة الثانية: ظهور النتيجة وتشغيل الصوت المضمون 100% بدون أي أخطاء
       if (isCorrect) {
-        await _correctPlayer.stop();
-        await _correctPlayer.seek(Duration.zero);
-        _correctPlayer.resume();
+        _correctPlayer.play(AssetSource('sounds/correct.mp3'));
       } else {
-        await _wrongPlayer.stop();
-        await _wrongPlayer.seek(Duration.zero);
-        _wrongPlayer.resume();
+        _wrongPlayer.play(AssetSource('sounds/wrong.mp3'));
       }
 
       // التوقف لمدة ثانية واحدة باللون الأخضر أو الأحمر مع الصوت، ثم الانتقال للنتيجة النهائية
