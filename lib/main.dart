@@ -90,8 +90,9 @@ class _GameScreenState extends State<GameScreen>
   bool hasWon = false;
   int earnedMoney = 0;
 
-  // مشغل الأصوات
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  // مشغلو الأصوات المنفصلون للاستجابة الفورية بدون أي تأخير
+  final AudioPlayer _correctPlayer = AudioPlayer();
+  final AudioPlayer _wrongPlayer = AudioPlayer();
 
   // متغيرات تتبع وسائل المساعدة (لكي تستخدم مرة واحدة فقط)
   bool isAudienceUsed = false;
@@ -149,6 +150,14 @@ class _GameScreenState extends State<GameScreen>
   @override
   void initState() {
     super.initState();
+    
+    // إعداد الأصوات بوضع الاستجابة السريعة (Low Latency) والتحميل المسبق لتظهر فور الضغط تماماً
+    _correctPlayer.setPlayerMode(PlayerMode.lowLatency);
+    _correctPlayer.setSource(AssetSource('sounds/correct.mp3'));
+
+    _wrongPlayer.setPlayerMode(PlayerMode.lowLatency);
+    _wrongPlayer.setSource(AssetSource('sounds/wrong.mp3'));
+
     _initializeGameQuestions();
     currentStudioMessage = StudioContentManager.getRandomMessage();
     startTimer();
@@ -262,7 +271,8 @@ class _GameScreenState extends State<GameScreen>
     _startupAdTimer?.cancel();
     _rewardedAd?.dispose();
     _interstitialAd?.dispose();
-    _audioPlayer.dispose();
+    _correctPlayer.dispose();
+    _wrongPlayer.dispose();
     super.dispose();
   }
 
@@ -275,8 +285,9 @@ class _GameScreenState extends State<GameScreen>
         sessionQuestions[currentQuestionIndex].correctAnswerIndex;
 
     if (isCorrect) {
-      // تشغيل صوت الإجابة الصحيحة
-      _audioPlayer.play(AssetSource('sounds/correct.mp3'));
+      // تشغيل صوت الإجابة الصحيحة فوراً بدون أي تأخير
+      _correctPlayer.seek(Duration.zero);
+      _correctPlayer.resume();
 
       int totalAllowedQuestions = sessionQuestions.length;
       bool isLastQuestion =
@@ -293,8 +304,9 @@ class _GameScreenState extends State<GameScreen>
 
       _showCorrectAnswerDialog(currentPrize, isLastQuestion);
     } else {
-      // تشغيل صوت الإجابة الخاطئة
-      _audioPlayer.play(AssetSource('sounds/wrong.mp3'));
+      // تشغيل صوت الإجابة الخاطئة فوراً بدون أي تأخير
+      _wrongPlayer.seek(Duration.zero);
+      _wrongPlayer.resume();
 
       setState(() {
         isGameOver = true;
