@@ -1275,7 +1275,7 @@ class _GameScreenState extends State<GameScreen>
 
   // أزرار الإجابات مع الحفاظ على الشكل الأصلي وإطار ذهبي يحيط به بالكامل من الأربع جهات
   Widget _buildAnswerButton(int index, String answer) {
-    const labels = ['A.', 'B.', 'C.', 'D.'];
+    const labels = ['A', 'B', 'C', 'D'];
     bool isHidden = hiddenOptions.contains(index);
 
     if (isHidden) {
