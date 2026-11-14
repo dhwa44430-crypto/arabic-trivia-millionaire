@@ -5,6 +5,7 @@ import 'quotes.dart';    // استدعاء ملف الأقوال والحكم ا
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:google_mobile_ads/google_mobile_ads.dart'; // حزمة أدموب الرسمية
+import 'package:audioplayers/audioplayers.dart'; // حزمة تشغيل الأصوات
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -88,6 +89,9 @@ class _GameScreenState extends State<GameScreen>
   bool isGameOver = false;
   bool hasWon = false;
   int earnedMoney = 0;
+
+  // مشغل الأصوات
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   // متغيرات تتبع وسائل المساعدة (لكي تستخدم مرة واحدة فقط)
   bool isAudienceUsed = false;
@@ -258,6 +262,7 @@ class _GameScreenState extends State<GameScreen>
     _startupAdTimer?.cancel();
     _rewardedAd?.dispose();
     _interstitialAd?.dispose();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -270,6 +275,9 @@ class _GameScreenState extends State<GameScreen>
         sessionQuestions[currentQuestionIndex].correctAnswerIndex;
 
     if (isCorrect) {
+      // تشغيل صوت الإجابة الصحيحة
+      _audioPlayer.play(AssetSource('sounds/correct.mp3'));
+
       int totalAllowedQuestions = sessionQuestions.length;
       bool isLastQuestion =
           currentQuestionIndex >= totalAllowedQuestions - 1;
@@ -285,6 +293,9 @@ class _GameScreenState extends State<GameScreen>
 
       _showCorrectAnswerDialog(currentPrize, isLastQuestion);
     } else {
+      // تشغيل صوت الإجابة الخاطئة
+      _audioPlayer.play(AssetSource('sounds/wrong.mp3'));
+
       setState(() {
         isGameOver = true;
         currentStudioMessage = StudioContentManager.getRandomMessage();
