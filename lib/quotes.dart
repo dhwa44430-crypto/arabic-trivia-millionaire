@@ -1,15 +1,3 @@
-class Question {
-  final String questionText;
-  final List<String> options;
-  final int correctAnswerIndex;
-
-  const Question({
-    required this.questionText,
-    required this.options,
-    required this.correctAnswerIndex,
-  });
-}
-
 // 1. أقوال المشاهير والمقدم
 const List<String> famousQuotes = [
   '«هل أنت متأكد من هذه الإجابة، أم أنك تريد الانسحاب؟»',
@@ -446,18 +434,4 @@ const List<String> audienceCheers = [
   'تفجير إبداعي، أنت الملك اليوم!',
   'الجمهور يصفق لك بحرارة شديدة!',
   'خطوات واثقة وثابتة نحو المجد!',
-];
-
-// قائمة الأسئلة
-final List<Question> arabicTriviaQuestions = [
-  const Question(
-    questionText: 'ما هي عاصمة جمهورية العراق؟',
-    options: ['بغداد', 'البصرة', 'الموصل', 'أربيل'],
-    correctAnswerIndex: 0,
-  ),
-  const Question(
-    questionText: 'أي من الكواكب التالية هو الأقرب إلى الشمس؟',
-    options: ['المريخ', 'عطارد', 'الزهرة', 'المشتري'],
-    correctAnswerIndex: 1,
-  ),
 ];
